@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Lock, Star } from 'lucide-react';
 import { UserContext } from '../App';
 
-const cars2D = [
+export const cars2D = [
   {
     id: 'starter',
     name: 'Neon Azul',

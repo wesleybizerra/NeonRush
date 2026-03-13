@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Heart, Zap, Pause, Play } from 'lucide-react';
 import { UserContext } from '../App';
+import { cars2D } from './garage';
 
 // --- GAME ENGINE ---
 interface GameObject {
@@ -21,13 +22,27 @@ export const PhaseGame2D = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { user, updateUser } = useContext(UserContext);
 
+  const getMaxLives = () => {
+    switch (user?.plan) {
+      case 'extreme': return 8; // 3 + 5
+      case 'pro': return 6; // 3 + 3
+      case 'basic': return 4; // 3 + 1
+      default: return 3;
+    }
+  };
+
+  const getPlayerCar = () => {
+    const selectedCarId = user?.garage?.selectedCar || 'starter';
+    return cars2D.find(c => c.id === selectedCarId) || cars2D[0];
+  };
+
   // Game State
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(getMaxLives());
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
   const [phaseCompleted, setPhaseCompleted] = useState(false);
 
@@ -42,12 +57,16 @@ export const PhaseGame2D = () => {
 
   // Game Loop Refs
   const requestRef = useRef<number>(0);
-  const playerRef = useRef<GameObject>({ x: 0, y: 0, width: 40, height: 80, color: '#00ffcc' });
+  const playerRef = useRef<GameObject>({ x: 0, y: 0, width: 40, height: 80, color: getPlayerCar().color });
   const enemiesRef = useRef<GameObject[]>([]);
   const coinsRef = useRef<GameObject[]>([]);
   const linesRef = useRef<{ y: number }[]>(Array.from({ length: 10 }).map((_, i) => ({ y: i * 100 })));
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const frameCountRef = useRef(0);
+
+  useEffect(() => {
+    playerRef.current.color = getPlayerCar().color;
+  }, [user?.garage?.selectedCar]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,7 +91,7 @@ export const PhaseGame2D = () => {
     setPhaseCompleted(false);
     setScore(0);
     setCoins(0);
-    setLives(3);
+    setLives(getMaxLives());
     enemiesRef.current = [];
     coinsRef.current = [];
     frameCountRef.current = 0;
@@ -80,6 +99,7 @@ export const PhaseGame2D = () => {
     if (canvasRef.current) {
       playerRef.current.x = canvasRef.current.width / 2 - playerRef.current.width / 2;
       playerRef.current.y = canvasRef.current.height - 120;
+      playerRef.current.color = getPlayerCar().color;
     }
   };
 
@@ -118,7 +138,7 @@ export const PhaseGame2D = () => {
     });
 
     // Player Movement
-    const speed = 8;
+    const speed = getPlayerCar().handling / 8;
     if ((keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) && playerRef.current.x > 0) {
       playerRef.current.x -= speed;
     }
@@ -396,7 +416,7 @@ export const PhaseGame2D = () => {
             <span className="font-mono text-xl font-bold text-yellow-500">{coins}</span>
           </div>
           <div className="flex items-center gap-1 mt-2">
-            {Array.from({ length: Math.max(3, lives) }).map((_, i) => (
+            {Array.from({ length: Math.max(3, getMaxLives()) }).map((_, i) => (
               <Heart key={i} className={`h-5 w-5 ${i < lives ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
             ))}
           </div>
