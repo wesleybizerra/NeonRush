@@ -35,7 +35,12 @@ export const Phases = () => {
                 transition={{ delay: (i % 20) * 0.02 }}
               >
                 <Link
-                  to={isUnlocked ? `/phase-2d/${phase.id}` : "#"}
+                  to={isUnlocked ? `/phase/${phase.id}` : "#"}
+                  onClick={(e) => {
+                    if (!isUnlocked) {
+                      e.preventDefault();
+                    }
+                  }}
                   className={`group relative flex aspect-square flex-col items-center justify-center rounded-2xl border transition-all ${isUnlocked
                       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black hover:scale-105"
                       : "border-white/5 bg-white/5 text-white/10 cursor-not-allowed"

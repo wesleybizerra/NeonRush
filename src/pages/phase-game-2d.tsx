@@ -41,7 +41,7 @@ export const PhaseGame2D = () => {
   }[Number(phaseId)] || { name: 'Unknown Zone', speed: 6, enemyColor: '#ff0055', bgColor: '#0a0a1a', goalScore: Number(phaseId) * 150 };
 
   // Game Loop Refs
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number>(0);
   const playerRef = useRef<GameObject>({ x: 0, y: 0, width: 40, height: 80, color: '#00ffcc' });
   const enemiesRef = useRef<GameObject[]>([]);
   const coinsRef = useRef<GameObject[]>([]);

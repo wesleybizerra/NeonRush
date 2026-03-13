@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Lock, Star } from 'lucide-react';
+import { UserContext } from '../App';
 
 const cars2D = [
   {
@@ -38,7 +39,14 @@ const cars2D = [
 
 export const Garage = () => {
   const { t } = useTranslation();
+  const { user, updateUser } = useContext(UserContext);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? cars2D.length - 1 : prev - 1));
@@ -50,8 +58,45 @@ export const Garage = () => {
 
   const currentCar = cars2D[currentIndex];
 
+  const handleEquip = () => {
+    if (!user) return;
+
+    // Check if user has required plan
+    const planLevels = { free: 0, basic: 1, pro: 2, extreme: 3 };
+    const userPlanLevel = planLevels[user.plan as keyof typeof planLevels] || 0;
+    const requiredPlanLevel = planLevels[currentCar.planRequired as keyof typeof planLevels] || 0;
+
+    if (userPlanLevel >= requiredPlanLevel) {
+      updateUser({
+        garage: {
+          ...user.garage,
+          selectedCar: currentCar.id,
+          carColor: currentCar.color,
+          selectedCharacter: user.garage?.selectedCharacter || "",
+          selectedOutfit: user.garage?.selectedOutfit || "",
+          bodykit: user.garage?.bodykit || {
+            wing: "Sem aero",
+            sideskirt: "Original",
+            bumper: "Original",
+            windows: "Cristal",
+          },
+          upgrades: user.garage?.upgrades || { engine: 0, suspension: 0, nitro: 0, brake: 0, turbo: 0 }
+        }
+      });
+      showToast(`Veículo ${currentCar.name} equipado com sucesso!`, 'success');
+    } else {
+      showToast(`Você precisa do plano ${currentCar.planRequired.toUpperCase()} para equipar este veículo.`, 'error');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black pt-24 pb-12 px-6">
+    <div className="min-h-screen bg-black pt-24 pb-12 px-6 relative">
+      {toast && (
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-bold uppercase tracking-widest shadow-2xl transition-all ${toast.type === 'success' ? 'bg-emerald-500 text-black' : 'bg-red-500 text-white'
+          }`}>
+          {toast.message}
+        </div>
+      )}
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-12">
           <h1 className="text-4xl font-black uppercase italic tracking-tighter">
@@ -64,14 +109,14 @@ export const Garage = () => {
         </div>
 
         <div className="relative flex items-center justify-center gap-12 py-12">
-          <button 
-            onClick={handlePrev} 
+          <button
+            onClick={handlePrev}
             className="group flex h-16 w-16 items-center justify-center rounded-full bg-white/5 border border-white/10 transition-all hover:bg-emerald-500 hover:text-black hover:scale-110 active:scale-95"
           >
             <ChevronLeft className="h-8 w-8" />
           </button>
 
-          <motion.div 
+          <motion.div
             key={currentIndex}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -79,14 +124,14 @@ export const Garage = () => {
           >
             {/* 2D Car Representation */}
             <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a1a] shadow-2xl flex items-center justify-center">
-              
+
               {/* Grid Background */}
               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-              
+
               {/* Glowing Car Shape */}
-              <div 
+              <div
                 className="relative w-32 h-64 rounded-t-full rounded-b-xl border-4 transition-all duration-500"
-                style={{ 
+                style={{
                   borderColor: currentCar.color,
                   boxShadow: `0 0 50px ${currentCar.color}88, inset 0 0 20px ${currentCar.color}88`,
                   backgroundColor: `${currentCar.color}22`
@@ -110,12 +155,12 @@ export const Garage = () => {
                 </div>
               )}
             </div>
-            
+
             <h2 className="text-5xl font-black uppercase italic tracking-tighter mb-2" style={{ color: currentCar.color, textShadow: `0 0 20px ${currentCar.color}88` }}>
               {currentCar.name}
             </h2>
             <p className="text-lg text-white/50 mb-6">{currentCar.details}</p>
-            
+
             <div className="flex gap-4 mb-8">
               <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-500">
                 {currentCar.specialty}
@@ -130,7 +175,7 @@ export const Garage = () => {
                   <span>{currentCar.speed}%</span>
                 </div>
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${currentCar.speed}%` }}
                     className="h-full rounded-full"
@@ -144,7 +189,7 @@ export const Garage = () => {
                   <span>{currentCar.handling}%</span>
                 </div>
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${currentCar.handling}%` }}
                     className="h-full rounded-full"
@@ -155,8 +200,8 @@ export const Garage = () => {
             </div>
           </motion.div>
 
-          <button 
-            onClick={handleNext} 
+          <button
+            onClick={handleNext}
             className="group flex h-16 w-16 items-center justify-center rounded-full bg-white/5 border border-white/10 transition-all hover:bg-emerald-500 hover:text-black hover:scale-110 active:scale-95"
           >
             <ChevronRight className="h-8 w-8" />
@@ -164,8 +209,11 @@ export const Garage = () => {
         </div>
 
         <div className="mt-12 flex justify-center">
-          <button className="group relative overflow-hidden rounded-full bg-emerald-500 px-16 py-5 text-sm font-black uppercase tracking-widest text-black transition-all hover:bg-emerald-400 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-            Equipar Este Veículo
+          <button
+            onClick={handleEquip}
+            className="group relative overflow-hidden rounded-full bg-emerald-500 px-16 py-5 text-sm font-black uppercase tracking-widest text-black transition-all hover:bg-emerald-400 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+          >
+            {user?.garage?.selectedCar === currentCar.id ? 'Equipado' : 'Equipar Este Veículo'}
           </button>
         </div>
       </div>
