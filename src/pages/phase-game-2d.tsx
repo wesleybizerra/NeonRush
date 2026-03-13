@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Coins, Heart, Zap, Pause, Play } from 'lucide-react';
+import { ArrowLeft, Coins, Heart, Zap, Pause, Play, Star } from 'lucide-react';
 import { UserContext } from '../App';
 import { cars2D } from './garage';
 
@@ -42,9 +42,20 @@ export const PhaseGame2D = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
+  const [gainedXP, setGainedXP] = useState(0);
   const [lives, setLives] = useState(getMaxLives());
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
   const [phaseCompleted, setPhaseCompleted] = useState(false);
+  const hasSavedProgress = useRef(false);
+
+  useEffect(() => {
+    let xpMultiplier = 1;
+    if (user?.plan === 'basic') xpMultiplier = 2;
+    if (user?.plan === 'pro') xpMultiplier = 3;
+    if (user?.plan === 'extreme') xpMultiplier = 5;
+
+    setGainedXP((coins * 10 + Math.floor(score / 10)) * xpMultiplier);
+  }, [score, coins, user?.plan]);
 
   // Phase Configuration
   const phaseConfig = {
@@ -95,6 +106,7 @@ export const PhaseGame2D = () => {
     enemiesRef.current = [];
     coinsRef.current = [];
     frameCountRef.current = 0;
+    hasSavedProgress.current = false;
 
     if (canvasRef.current) {
       playerRef.current.x = canvasRef.current.width / 2 - playerRef.current.width / 2;
@@ -254,14 +266,15 @@ export const PhaseGame2D = () => {
 
   // Save Progress to Firebase
   const saveProgress = async () => {
-    if (!user) return;
+    if (!user || hasSavedProgress.current) return;
+    hasSavedProgress.current = true;
 
     let xpMultiplier = 1;
     if (user.plan === 'basic') xpMultiplier = 2;
     if (user.plan === 'pro') xpMultiplier = 3;
     if (user.plan === 'extreme') xpMultiplier = 5;
 
-    let gainedXP = coins * 10 * xpMultiplier;
+    let gainedXP = (coins * 10 + Math.floor(score / 10)) * xpMultiplier;
     let gainedCredits = coins;
 
     // Task Progress Logic
@@ -312,7 +325,7 @@ export const PhaseGame2D = () => {
       if (currentXP >= requiredXP) {
         currentLevel++;
         if (user.plan !== 'extreme') {
-          currentXP = 0; // Reset XP if not extreme plan
+          currentXP -= requiredXP; // Reset XP if not extreme plan, but keep excess
         }
       } else {
         break;
@@ -410,6 +423,10 @@ export const PhaseGame2D = () => {
           <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
             <Zap className="h-4 w-4 text-emerald-500" />
             <span className="font-mono text-xl font-bold">{score.toString().padStart(6, '0')}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+            <Star className="h-4 w-4 text-emerald-500" />
+            <span className="font-mono text-xl font-bold text-emerald-500">{gainedXP}</span>
           </div>
           <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
             <Coins className="h-4 w-4 text-yellow-500" />
