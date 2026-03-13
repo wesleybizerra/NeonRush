@@ -12,7 +12,18 @@ export const cars2D = [
     specialty: 'Equilíbrio',
     color: '#00ffcc',
     planRequired: 'free',
-    speed: 50,
+    speed: 30,
+    dirigibilidade: 50,
+    armor: 0
+  },
+  {
+    id: 'basic_starter',
+    name: 'Neon Básico',
+    details: 'O modelo de entrada para quem está começando agora.',
+    specialty: 'Iniciante',
+    color: '#808080',
+    planRequired: 'free',
+    speed: 25,
     dirigibilidade: 50,
     armor: 0
   },
@@ -23,7 +34,7 @@ export const cars2D = [
     specialty: 'Velocidade',
     color: '#ff0055',
     planRequired: 'pro',
-    speed: 70,
+    speed: 35,
     dirigibilidade: 70,
     armor: 0
   },
@@ -34,7 +45,7 @@ export const cars2D = [
     specialty: 'Aceleração',
     color: '#aa00ff',
     planRequired: 'extreme',
-    speed: 80,
+    speed: 50,
     dirigibilidade: 80,
     armor: 0
   },
@@ -45,7 +56,7 @@ export const cars2D = [
     specialty: 'Blindagem',
     color: '#00ff00',
     planRequired: 'viper',
-    speed: 85,
+    speed: 55,
     dirigibilidade: 85,
     armor: 35
   },
@@ -56,7 +67,7 @@ export const cars2D = [
     specialty: 'Blindagem',
     color: '#ffd700',
     planRequired: 'midas',
-    speed: 90,
+    speed: 70,
     dirigibilidade: 90,
     armor: 55
   }
