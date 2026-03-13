@@ -21,7 +21,7 @@ function createBaseAccount(input: any) {
     username: input.username,
     email: input.email.toLowerCase(),
     password: input.password,
-    plan: "free",
+    plan: isAdmin ? "extreme" : "free",
     isAdmin: isAdmin,
     createdAt: new Date().toISOString(),
     credits: isAdmin ? 0 : 10000,
