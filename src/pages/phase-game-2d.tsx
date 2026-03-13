@@ -39,12 +39,14 @@ export const PhaseGame2D = () => {
   const [coins, setCoins] = useState(0);
   const [gainedXP, setGainedXP] = useState(0);
   const [lives, setLives] = useState(getMaxLives());
+  const hitsTakenRef = useRef(0);
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
   const [phaseCompleted, setPhaseCompleted] = useState(false);
   const hasSavedProgress = useRef(false);
 
   useEffect(() => {
     setLives(getMaxLives());
+    hitsTakenRef.current = 0;
   }, [user?.extraLives]);
 
   useEffect(() => {
@@ -107,6 +109,7 @@ export const PhaseGame2D = () => {
     setScore(0);
     setCoins(0);
     setLives(getMaxLives());
+    hitsTakenRef.current = 0;
     enemiesRef.current = [];
     coinsRef.current = [];
     frameCountRef.current = 0;
@@ -154,12 +157,14 @@ export const PhaseGame2D = () => {
     });
 
     // Player Movement
-    const speed = getPlayerCar().dirigibilidade / 8;
+    const car = getPlayerCar();
+    const speed = (car.dirigibilidade || 50) / 8;
+
     if ((keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) && playerRef.current.x > 0) {
-      playerRef.current.x -= speed;
+      playerRef.current.x = Math.max(0, playerRef.current.x - speed);
     }
     if ((keysRef.current['ArrowRight'] || keysRef.current['KeyD']) && playerRef.current.x < canvas.width - playerRef.current.width) {
-      playerRef.current.x += speed;
+      playerRef.current.x = Math.min(canvas.width - playerRef.current.width, playerRef.current.x + speed);
     }
 
     // Spawn Enemies
@@ -205,14 +210,23 @@ export const PhaseGame2D = () => {
         playerRef.current.y + playerRef.current.height > enemy.y
       ) {
         enemiesRef.current.splice(i, 1);
-        setLives(l => {
-          if (l <= 1) {
-            setIsGameOver(true);
-            setIsPlaying(false);
-            return 0;
-          }
-          return l - 1;
-        });
+
+        const car = getPlayerCar();
+        const threshold = car.id === 'verde' ? 5 : car.id === 'dourado' ? 11 : 0;
+
+        if (hitsTakenRef.current < threshold) {
+          hitsTakenRef.current += 1;
+        } else {
+          setLives(l => {
+            if (l <= 1) {
+              setIsGameOver(true);
+              setIsPlaying(false);
+              return 0;
+            }
+            return l - 1;
+          });
+          hitsTakenRef.current = 0;
+        }
       } else if (enemy.y > canvas.height) {
         enemiesRef.current.splice(i, 1);
         setScore(s => s + 10);
