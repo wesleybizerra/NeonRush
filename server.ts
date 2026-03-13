@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  
+
   // Middleware de CORS manual para aceitar requisições do Electron (file://)
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -29,8 +29,8 @@ async function startServer() {
   const PORT = process.env.PORT || 3000;
 
   // Mercado Pago Initialization
-  const client = new MercadoPagoConfig({ 
-    accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || "APP_USR-5486188186277562-123109-0c5bb1142056dd529240d38a493ce08d-650681524" 
+  const client = new MercadoPagoConfig({
+    accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || "APP_USR-5486188186277562-123109-0c5bb1142056dd529240d38a493ce08d-650681524"
   });
 
   app.use(express.json());
@@ -61,6 +61,12 @@ async function startServer() {
           payer: { email: email || "comprador.teste@neonrush.com" },
           back_urls: { success: `${appUrl}/success`, failure: `${appUrl}/failure`, pending: `${appUrl}/pending` },
           auto_return: "approved",
+          binary_mode: true,
+          payment_methods: {
+            excluded_payment_types: [],
+            excluded_payment_methods: [],
+            installments: 1
+          },
         },
       });
       res.json({ id: response.id, init_point: response.init_point });
@@ -68,11 +74,11 @@ async function startServer() {
       // Extrai o erro profundo do Mercado Pago
       const deepError = error.cause || error.message || error;
       const errorMessage = typeof deepError === 'object' ? JSON.stringify(deepError) : deepError;
-      
+
       console.error("Mercado Pago error full:", errorMessage);
-      
-      res.status(500).json({ 
-        error: "Failed to create preference", 
+
+      res.status(500).json({
+        error: "Failed to create preference",
         details: errorMessage
       });
     }
