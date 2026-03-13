@@ -327,6 +327,8 @@ export const PhaseGame2D = () => {
             if (user.plan === 'basic') taskXP = 50;
             if (user.plan === 'pro') taskXP = 70;
             if (user.plan === 'extreme') taskXP = 100;
+            if (user.plan === 'viper') taskXP = 120;
+            if (user.plan === 'midas') taskXP = 150;
 
             gainedXP += taskXP;
             gainedCredits += task.rewardCoins;
