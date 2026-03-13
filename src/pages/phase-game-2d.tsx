@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Coins, Heart, Zap, Pause, Play, Star } from 'lucide-react';
 import { UserContext } from '../App';
 import { cars2D } from './garage';
+import { useGameAudio } from '../hooks/useGameAudio';
 
 // --- GAME ENGINE ---
 interface GameObject {
@@ -21,6 +22,7 @@ export const PhaseGame2D = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { user, updateUser } = useContext(UserContext);
+  const { play, pause } = useGameAudio('https://res.cloudinary.com/dwno3zfg6/video/upload/v1773387335/Toque_de_Fase_Final_dd5yqg.mp3');
 
   const getMaxLives = () => {
     return 3 + (user?.extraLives || 0);
@@ -114,6 +116,8 @@ export const PhaseGame2D = () => {
     coinsRef.current = [];
     frameCountRef.current = 0;
     hasSavedProgress.current = false;
+
+    play(); // Start audio
 
     if (canvasRef.current) {
       playerRef.current.x = canvasRef.current.width / 2 - playerRef.current.width / 2;
@@ -399,6 +403,7 @@ export const PhaseGame2D = () => {
 
   const handleExit = async () => {
     await saveProgress();
+    pause(); // Stop audio
     navigate('/phases');
   };
 
