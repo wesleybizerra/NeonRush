@@ -52,6 +52,7 @@ type UserAccount = {
   password?: string;
   plan: PlanId;
   isAdmin: boolean;
+  extraLives?: number;
   createdAt?: string;
   credits?: number;
   xp?: number;
@@ -144,18 +145,39 @@ export function App() {
 
   useEffect(() => {
     if (currentUser && currentUser.email === 'wesleybizerra@hotmail.com') {
-      if (currentUser.unlockedPhase === 30 || currentUser.credits === 10000 || currentUser.level === undefined || currentUser.plan !== 'midas') {
+      if (currentUser.unlockedPhase === 30 || currentUser.credits === 10000 || currentUser.level === undefined || currentUser.plan !== 'midas' || currentUser.extraLives !== 10) {
         updateUser({
           unlockedPhase: 1,
           level: 0,
           xp: 0,
           credits: 0,
           plan: 'midas',
+          extraLives: 10,
           taskProgress: {}
         });
       }
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const benefits = {
+      free: { extraLives: 0 },
+      basic: { extraLives: 1 },
+      pro: { extraLives: 3 },
+      extreme: { extraLives: 5 },
+      viper: { extraLives: 7 },
+      midas: { extraLives: 10 },
+    };
+
+    const planBenefits = benefits[currentUser.plan as keyof typeof benefits] || benefits.free;
+
+    if (currentUser.extraLives !== planBenefits.extraLives) {
+      updateUser({ extraLives: planBenefits.extraLives });
+    }
+  }, [currentUser?.plan]);
+
 
   const handleAuthSuccess = (email: string) => {
     setCurrentEmail(email);
