@@ -5,6 +5,7 @@ import { ArrowLeft, Coins, Heart, Zap, Pause, Play, Star } from 'lucide-react';
 import { UserContext } from '../App';
 import { cars2D } from './garage';
 import { useGameAudio } from '../hooks/useGameAudio';
+import { useDailyTimeTracker } from '../hooks/useDailyTimeTracker';
 
 // --- GAME ENGINE ---
 interface GameObject {
@@ -23,6 +24,7 @@ export const PhaseGame2D = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { user, updateUser } = useContext(UserContext);
   const { play, pause } = useGameAudio('https://res.cloudinary.com/dwno3zfg6/video/upload/v1773387335/Toque_de_Fase_Final_dd5yqg.mp3');
+  useDailyTimeTracker();
 
   const getMaxLives = () => {
     return 3 + (user?.extraLives || 0);
@@ -514,12 +516,20 @@ export const PhaseGame2D = () => {
           {isPaused && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
               <h2 className="text-4xl font-black uppercase italic mb-8 text-white">Pausado</h2>
-              <button
-                onClick={() => setIsPaused(false)}
-                className="rounded-full bg-emerald-500 px-12 py-4 text-sm font-black uppercase tracking-widest text-black hover:bg-emerald-400 hover:scale-105 transition-all"
-              >
-                Continuar
-              </button>
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={() => setIsPaused(false)}
+                  className="rounded-full bg-emerald-500 px-12 py-4 text-sm font-black uppercase tracking-widest text-black hover:bg-emerald-400 hover:scale-105 transition-all"
+                >
+                  Continuar
+                </button>
+                <button
+                  onClick={handleExit}
+                  className="rounded-full bg-white/10 border border-white/20 px-12 py-4 text-sm font-black uppercase tracking-widest text-white hover:bg-white/20 transition-all"
+                >
+                  Sair
+                </button>
+              </div>
             </div>
           )}
 

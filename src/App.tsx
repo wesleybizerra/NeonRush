@@ -13,6 +13,7 @@ import { PhaseGame } from "./pages/phase-game";
 import { PhaseGame2D } from "./pages/phase-game-2d";
 import { Phases } from "./pages/phases";
 import { DailyTasks } from "./pages/daily-tasks";
+import { DailyRewards } from "./pages/daily-rewards";
 
 export const UserContext = React.createContext<{
   user: UserAccount | null;
@@ -63,6 +64,7 @@ type UserAccount = {
   deviceId?: string;
   ip?: string;
   taskProgress?: Record<string, { progress: number, completed: boolean, date: string }>;
+  dailyRewards?: { currentDay: number, lastPlayedDate: string, secondsPlayedToday: number };
 };
 
 const STORAGE_SESSION = "neon-rush-session";
@@ -225,6 +227,7 @@ export function App() {
                     <Link to="/plans" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('plans')}</Link>
                     <Link to="/profile" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('profile')}</Link>
                     <Link to="/tasks" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Missões</Link>
+                    <Link to="/daily-rewards" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Prêmios</Link>
                     <Link to="/phases" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Fases</Link>
                   </nav>
 
@@ -246,6 +249,7 @@ export function App() {
                   <Route path="/plans" element={<Plans userEmail={currentEmail} />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/tasks" element={<DailyTasks />} />
+                  <Route path="/daily-rewards" element={<DailyRewards />} />
                   <Route path="/phases" element={<Phases />} />
                   <Route path="/phase/:phaseId" element={<PhaseGame2D />} />
                   <Route path="/phase-3d/:phaseId" element={<PhaseGame2D />} />
