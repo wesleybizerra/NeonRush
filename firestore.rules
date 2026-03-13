@@ -1,0 +1,107 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId}
+// Fields:
+//   - id: string (required)
+//   - username: string (required)
+//   - email: string (required)
+//   - password: string (required)
+//   - plan: string (required, enum: ["free", "basic", "pro", "extreme"])
+//   - isAdmin: boolean (required)
+//   - createdAt: string (required, format: date-time)
+//   - credits: number (required)
+//   - xp: number (required)
+//   - unlockedPhase: number (required)
+//   - lastTaskUpdate: string (optional, format: date-time)
+//   - tasks: list (optional)
+//   - inventory: map (required)
+//   - garage: map (required)
+//   - deviceId: string (optional)
+//   - ip: string (optional)
+//
+// Collection: creation_logs
+// Document ID: {logId}
+// Fields:
+//   - ip: string (required)
+//   - deviceId: string (required)
+//   - count: number (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.email == "wesleybizerra@hotmail.com" ||
+         request.auth.token.email == "wesleybizerra05@gmail.com");
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users {
+      allow read: if true;
+      match /{userId} {
+        allow read, write: if true;
+      }
+    }
+
+    match /creation_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUserForCreate(data) {
+      return data.keys().hasAll(['id', 'username', 'email', 'password', 'plan', 'isAdmin', 'createdAt', 'credits', 'xp', 'unlockedPhase', 'inventory', 'garage']) &&
+             data.username is string && data.username.size() > 0 && data.username.size() < 50 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.plan in ["free", "basic", "pro", "extreme"] &&
+             data.credits is number &&
+             data.xp is number &&
+             data.unlockedPhase is number &&
+             data.inventory is map &&
+             data.garage is map &&
+             (!('tasks' in data) || data.tasks is list) &&
+             (!('currentPlan' in data) || data.currentPlan in ["free", "basic", "pro", "extreme"]) &&
+             (!('ownedCars' in data) || data.ownedCars is list) &&
+             (!('ownedSkins' in data) || data.ownedSkins is list);
+    }
+
+    function isValidUserForUpdate(data) {
+      return (!('username' in data) || (data.username is string && data.username.size() > 0 && data.username.size() < 50)) &&
+             (!('email' in data) || (data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) &&
+             (!('plan' in data) || (data.plan in ["free", "basic", "pro", "extreme"])) &&
+             (!('credits' in data) || (data.credits is number)) &&
+             (!('xp' in data) || (data.xp is number)) &&
+             (!('unlockedPhase' in data) || (data.unlockedPhase is number)) &&
+             (!('inventory' in data) || (data.inventory is map)) &&
+             (!('garage' in data) || (data.garage is map)) &&
+             (!('lastTaskUpdate' in data) || (data.lastTaskUpdate is string)) &&
+             (!('tasks' in data) || data.tasks is list) &&
+             (!('currentPlan' in data) || data.currentPlan in ["free", "basic", "pro", "extreme"]) &&
+             (!('ownedCars' in data) || data.ownedCars is list) &&
+             (!('ownedSkins' in data) || data.ownedSkins is list);
+    }
+  }
+}

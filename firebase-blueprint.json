@@ -1,0 +1,97 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "User Account",
+      "description": "Stores user profile, game progress, and garage state.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "password": { "type": "string" },
+        "plan": { "type": "string", "enum": ["free", "basic", "pro", "extreme"] },
+        "isAdmin": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "credits": { "type": "number" },
+        "xp": { "type": "number" },
+        "unlockedPhase": { "type": "number" },
+        "currentPlan": { "type": "string", "enum": ["free", "basic", "pro", "extreme"] },
+        "ownedCars": { "type": "array", "items": { "type": "string" } },
+        "ownedSkins": { "type": "array", "items": { "type": "string" } },
+        "lastTaskUpdate": { "type": "string", "format": "date-time" },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "completed"] },
+              "type": { "type": "string" }
+            }
+          }
+        },
+        "inventory": {
+          "type": "object",
+          "properties": {
+            "characters": { "type": "array", "items": { "type": "string" } },
+            "cars": { "type": "array", "items": { "type": "string" } },
+            "outfits": { "type": "array", "items": { "type": "string" } },
+            "evolutions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "garage": {
+          "type": "object",
+          "properties": {
+            "carColor": { "type": "string" },
+            "selectedCar": { "type": "string" },
+            "selectedCharacter": { "type": "string" },
+            "selectedOutfit": { "type": "string" },
+            "bodykit": {
+              "type": "object",
+              "properties": {
+                "wing": { "type": "string" },
+                "sideskirt": { "type": "string" },
+                "bumper": { "type": "string" },
+                "windows": { "type": "string" }
+              }
+            },
+            "upgrades": {
+              "type": "object",
+              "properties": {
+                "engine": { "type": "number" },
+                "suspension": { "type": "number" },
+                "nitro": { "type": "number" },
+                "brake": { "type": "number" },
+                "turbo": { "type": "number" }
+              }
+            }
+          }
+        },
+        "deviceId": { "type": "string" },
+        "ip": { "type": "string" }
+      },
+      "required": ["id", "username", "email", "password", "plan", "isAdmin", "createdAt", "credits", "xp", "unlockedPhase", "inventory", "garage"]
+    },
+    "CreationLog": {
+      "title": "Creation Log",
+      "description": "Tracks account creation by IP and Device ID to enforce limits.",
+      "type": "object",
+      "properties": {
+        "ip": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "count": { "type": "number" }
+      },
+      "required": ["ip", "deviceId", "count"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserAccount",
+      "description": "Collection of all user accounts."
+    },
+    "/creation_logs/{logId}": {
+      "schema": "CreationLog",
+      "description": "Logs to track creation limits."
+    }
+  }
+}
