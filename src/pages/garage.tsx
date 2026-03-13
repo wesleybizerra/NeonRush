@@ -12,8 +12,9 @@ export const cars2D = [
     specialty: 'Equilíbrio',
     color: '#00ffcc',
     planRequired: 'free',
-    speed: 60,
-    handling: 70
+    speed: 50,
+    dirigibilidade: 50,
+    armor: 0
   },
   {
     id: 'pro',
@@ -22,8 +23,9 @@ export const cars2D = [
     specialty: 'Velocidade',
     color: '#ff0055',
     planRequired: 'pro',
-    speed: 85,
-    handling: 60
+    speed: 70,
+    dirigibilidade: 70,
+    armor: 0
   },
   {
     id: 'extreme',
@@ -32,8 +34,31 @@ export const cars2D = [
     specialty: 'Aceleração',
     color: '#aa00ff',
     planRequired: 'extreme',
-    speed: 100,
-    handling: 90
+    speed: 80,
+    dirigibilidade: 80,
+    armor: 0
+  },
+  {
+    id: 'verde',
+    name: 'Viper Verde',
+    details: 'Velocidade bruta e proteção. Exclusivo do Plano Corredor Cyber.',
+    specialty: 'Blindagem',
+    color: '#00ff00',
+    planRequired: 'viper',
+    speed: 85,
+    dirigibilidade: 85,
+    armor: 35
+  },
+  {
+    id: 'dourado',
+    name: 'Midas Dourado',
+    details: 'O auge do luxo e proteção. Exclusivo do Plano Lenda do Neon.',
+    specialty: 'Blindagem',
+    color: '#ffd700',
+    planRequired: 'midas',
+    speed: 90,
+    dirigibilidade: 90,
+    armor: 55
   }
 ];
 
@@ -62,7 +87,7 @@ export const Garage = () => {
     if (!user) return;
 
     // Check if user has required plan
-    const planLevels = { free: 0, basic: 1, pro: 2, extreme: 3 };
+    const planLevels = { free: 0, basic: 1, pro: 2, extreme: 3, viper: 4, midas: 5 };
     const userPlanLevel = planLevels[user.plan as keyof typeof planLevels] || 0;
     const requiredPlanLevel = planLevels[currentCar.planRequired as keyof typeof planLevels] || 0;
 
@@ -185,18 +210,33 @@ export const Garage = () => {
               </div>
               <div>
                 <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">
-                  <span>Manobrabilidade</span>
-                  <span>{currentCar.handling}%</span>
+                  <span>Dirigibilidade</span>
+                  <span>{currentCar.dirigibilidade}%</span>
                 </div>
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${currentCar.handling}%` }}
+                    animate={{ width: `${currentCar.dirigibilidade}%` }}
                     className="h-full rounded-full"
                     style={{ backgroundColor: currentCar.color }}
                   />
                 </div>
               </div>
+              {currentCar.armor > 0 && (
+                <div>
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">
+                    <span>Blindagem</span>
+                    <span>{currentCar.armor}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${currentCar.armor}%` }}
+                      className="h-full rounded-full bg-emerald-500"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 

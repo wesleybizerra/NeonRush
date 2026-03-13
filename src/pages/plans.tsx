@@ -87,7 +87,7 @@ export const Plans = ({ userEmail }: { userEmail: string }) => {
     },
     {
       id: 'pro',
-      name: 'Corredor Cyber',
+      name: 'Corredor Pro',
       price: 'R$ 10,00',
       features: [
         "Ganha 3x mais pontos",

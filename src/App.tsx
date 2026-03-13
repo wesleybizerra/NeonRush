@@ -21,7 +21,7 @@ export const UserContext = React.createContext<{
 
 // ... (rest of the file remains the same)
 
-type PlanId = "free" | "basic" | "pro" | "extreme";
+type PlanId = "free" | "basic" | "pro" | "extreme" | "viper" | "midas";
 type UpgradeKey = "engine" | "suspension" | "nitro" | "brake" | "turbo";
 
 type GarageState = {
@@ -144,13 +144,13 @@ export function App() {
 
   useEffect(() => {
     if (currentUser && currentUser.email === 'wesleybizerra@hotmail.com') {
-      if (currentUser.unlockedPhase === 30 || currentUser.credits === 10000 || currentUser.level === undefined || currentUser.plan !== 'extreme') {
+      if (currentUser.unlockedPhase === 30 || currentUser.credits === 10000 || currentUser.level === undefined || currentUser.plan !== 'midas') {
         updateUser({
           unlockedPhase: 1,
           level: 0,
           xp: 0,
           credits: 0,
-          plan: 'extreme',
+          plan: 'midas',
           taskProgress: {}
         });
       }
