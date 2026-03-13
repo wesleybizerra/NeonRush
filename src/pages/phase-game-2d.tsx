@@ -49,21 +49,17 @@ export const PhaseGame2D = () => {
   const hasSavedProgress = useRef(false);
 
   useEffect(() => {
-    let completionBonusXP = 20; // Default for free
     let xpPerCoin = 10;
 
     if (user?.plan === 'basic') {
-      completionBonusXP = 50;
       xpPerCoin = 20;
     } else if (user?.plan === 'pro') {
-      completionBonusXP = 70;
       xpPerCoin = 30;
     } else if (user?.plan === 'extreme') {
-      completionBonusXP = 100;
       xpPerCoin = 50;
     }
 
-    setGainedXP(completionBonusXP + (coins * xpPerCoin));
+    setGainedXP(coins * xpPerCoin);
   }, [coins, user?.plan]);
 
   // Phase Configuration
@@ -281,25 +277,21 @@ export const PhaseGame2D = () => {
     }
     hasSavedProgress.current = true;
 
-    // XP based on plan for completing the phase
-    let completionBonusXP = 20; // Default for free
+    // XP based on plan for collecting coins
     let xpPerCoin = 10;
 
     if (user.plan === 'basic') {
-      completionBonusXP = 50;
       xpPerCoin = 20;
     } else if (user.plan === 'pro') {
-      completionBonusXP = 70;
       xpPerCoin = 30;
     } else if (user.plan === 'extreme') {
-      completionBonusXP = 100;
       xpPerCoin = 50;
     }
 
-    let gainedXP = completionBonusXP + (coins * xpPerCoin);
+    let gainedXP = (coins * xpPerCoin);
     let gainedCredits = coins;
 
-    console.log('XP Calculation Start:', { coins, score, plan: user.plan, gainedXP, completionBonusXP, xpPerCoin });
+    console.log('XP Calculation Start:', { coins, score, plan: user.plan, gainedXP, xpPerCoin });
 
     // Task Progress Logic
     const { generateDailyTasks, getDailySeed } = await import('../utils/tasks');
