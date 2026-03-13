@@ -269,6 +269,7 @@ export const PhaseGame2D = () => {
     if (!user || hasSavedProgress.current) return;
     hasSavedProgress.current = true;
 
+    // XP based on plan for completing the phase
     let gainedXP = 20; // Default for free
     if (user.plan === 'basic') gainedXP = 50;
     if (user.plan === 'pro') gainedXP = 70;
@@ -276,7 +277,7 @@ export const PhaseGame2D = () => {
 
     let gainedCredits = coins;
 
-    console.log('XP Calculation:', { coins, score, plan: user.plan, gainedXP });
+    console.log('XP Calculation Start:', { coins, score, plan: user.plan, gainedXP });
 
     // Task Progress Logic
     const { generateDailyTasks, getDailySeed } = await import('../utils/tasks');
@@ -316,12 +317,15 @@ export const PhaseGame2D = () => {
 
             gainedXP += taskXP;
             gainedCredits += task.rewardCoins;
+            console.log('Task Completed:', { taskTitle: task.title, taskXP });
           }
 
           taskProgress[task.id] = currentP;
         }
       }
     });
+
+    console.log('Total XP Gained:', gainedXP);
 
     let currentXP = (user.xp || 0) + gainedXP;
     let currentLevel = user.level || 1;
