@@ -275,7 +275,10 @@ export const PhaseGame2D = () => {
 
   // Save Progress to Firebase
   const saveProgress = async () => {
-    if (!user || hasSavedProgress.current) return;
+    if (!user || hasSavedProgress.current) {
+      console.log('saveProgress skipped', { hasSavedProgress: hasSavedProgress.current });
+      return;
+    }
     hasSavedProgress.current = true;
 
     // XP based on plan for completing the phase
