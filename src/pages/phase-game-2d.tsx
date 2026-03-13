@@ -49,13 +49,22 @@ export const PhaseGame2D = () => {
   const hasSavedProgress = useRef(false);
 
   useEffect(() => {
-    let xp = 20; // Default for free
-    if (user?.plan === 'basic') xp = 50;
-    if (user?.plan === 'pro') xp = 70;
-    if (user?.plan === 'extreme') xp = 100;
+    let completionBonusXP = 20; // Default for free
+    let xpPerCoin = 10;
 
-    setGainedXP(xp);
-  }, [user?.plan]);
+    if (user?.plan === 'basic') {
+      completionBonusXP = 50;
+      xpPerCoin = 20;
+    } else if (user?.plan === 'pro') {
+      completionBonusXP = 70;
+      xpPerCoin = 30;
+    } else if (user?.plan === 'extreme') {
+      completionBonusXP = 100;
+      xpPerCoin = 50;
+    }
+
+    setGainedXP(completionBonusXP + (coins * xpPerCoin));
+  }, [coins, user?.plan]);
 
   // Phase Configuration
   const phaseConfig = {
@@ -270,14 +279,24 @@ export const PhaseGame2D = () => {
     hasSavedProgress.current = true;
 
     // XP based on plan for completing the phase
-    let gainedXP = 20; // Default for free
-    if (user.plan === 'basic') gainedXP = 50;
-    if (user.plan === 'pro') gainedXP = 70;
-    if (user.plan === 'extreme') gainedXP = 100;
+    let completionBonusXP = 20; // Default for free
+    let xpPerCoin = 10;
 
+    if (user.plan === 'basic') {
+      completionBonusXP = 50;
+      xpPerCoin = 20;
+    } else if (user.plan === 'pro') {
+      completionBonusXP = 70;
+      xpPerCoin = 30;
+    } else if (user.plan === 'extreme') {
+      completionBonusXP = 100;
+      xpPerCoin = 50;
+    }
+
+    let gainedXP = completionBonusXP + (coins * xpPerCoin);
     let gainedCredits = coins;
 
-    console.log('XP Calculation Start:', { coins, score, plan: user.plan, gainedXP });
+    console.log('XP Calculation Start:', { coins, score, plan: user.plan, gainedXP, completionBonusXP, xpPerCoin });
 
     // Task Progress Logic
     const { generateDailyTasks, getDailySeed } = await import('../utils/tasks');
@@ -520,7 +539,7 @@ export const PhaseGame2D = () => {
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-white/50 uppercase text-xs font-bold tracking-widest">XP Ganho</span>
                   <span className="font-mono text-xl font-bold text-emerald-500">
-                    +{coins * 10 * (user?.plan === 'extreme' ? 5 : user?.plan === 'pro' ? 3 : user?.plan === 'basic' ? 2 : 1)}
+                    +{coins * (user?.plan === 'extreme' ? 50 : user?.plan === 'pro' ? 30 : user?.plan === 'basic' ? 20 : 10)}
                   </span>
                 </div>
                 <div className="h-px w-full bg-white/10 my-4" />
