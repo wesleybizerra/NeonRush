@@ -46,6 +46,8 @@ async function startServer() {
       basic: { name: "Plano Basico", price: 5 },
       pro: { name: "Plano Profissional", price: 10 },
       extreme: { name: "Plano Extremo", price: 15 },
+      viper: { name: "Plano Viper Verde", price: 20 },
+      midas: { name: "Plano Midas Dourado", price: 25 },
     };
 
     const plan = plans[planId];

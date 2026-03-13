@@ -108,6 +108,28 @@ export const Plans = ({ userEmail }: { userEmail: string }) => {
         "Sem Anúncios"
       ]
     },
+    {
+      id: 'viper',
+      name: 'Corredor Cyber',
+      price: 'R$ 20,00',
+      features: [
+        "Ganha 7x mais pontos",
+        "Carro Exclusivo: Viper Verde",
+        "XP NÃO RESETA ao subir de nível",
+        "+7 Vidas Extras por corrida"
+      ]
+    },
+    {
+      id: 'midas',
+      name: 'Lenda Dourada',
+      price: 'R$ 25,00',
+      features: [
+        "Ganha 10x mais pontos",
+        "Carro Exclusivo: Midas Dourado",
+        "XP NÃO RESETA ao subir de nível",
+        "+10 Vidas Extras por corrida"
+      ]
+    },
   ];
 
   return (
