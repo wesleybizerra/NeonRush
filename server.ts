@@ -58,7 +58,13 @@ async function startServer() {
       const response = await preference.create({
         body: {
           items: [{ id: planId, title: plan.name, quantity: 1, unit_price: plan.price, currency_id: "BRL" }],
-          payer: { email: email || "comprador.teste@neonrush.com" },
+          payer: {
+            email: email || "comprador.teste@neonrush.com",
+            identification: {
+              type: "CPF",
+              number: "12345678909"
+            }
+          },
           back_urls: { success: `${appUrl}/success`, failure: `${appUrl}/failure`, pending: `${appUrl}/pending` },
           auto_return: "approved",
           binary_mode: true,
