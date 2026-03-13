@@ -11,6 +11,39 @@ export const cars2D = [
     details: 'O carro inicial. Ágil e confiável para as ruas de Neon City.',
     specialty: 'Equilíbrio',
     color: '#00ffcc',
+    planRequired: 'piloto',
+    speed: 30,
+    dirigibilidade: 50,
+    armor: 0
+  },
+  {
+    id: 'neon_free',
+    name: 'NEON',
+    details: 'O clássico das ruas, liberado para todos.',
+    specialty: 'Equilíbrio',
+    color: '#ff00ff',
+    planRequired: 'free',
+    speed: 30,
+    dirigibilidade: 50,
+    armor: 0
+  },
+  {
+    id: 'free_1',
+    name: 'Street Racer',
+    details: 'Um carro ágil para quem está começando.',
+    specialty: 'Equilíbrio',
+    color: '#ff9900',
+    planRequired: 'free',
+    speed: 30,
+    dirigibilidade: 50,
+    armor: 0
+  },
+  {
+    id: 'free_2',
+    name: 'Urban Ghost',
+    details: 'Silencioso e rápido nas curvas.',
+    specialty: 'Equilíbrio',
+    color: '#00ccff',
     planRequired: 'free',
     speed: 30,
     dirigibilidade: 50,
@@ -98,7 +131,7 @@ export const Garage = () => {
     if (!user) return;
 
     // Check if user has required plan
-    const planLevels = { free: 0, basic: 1, pro: 2, extreme: 3, viper: 4, midas: 5 };
+    const planLevels = { free: 0, piloto: 1, basic: 2, pro: 3, extreme: 4, viper: 5, midas: 6 };
     const userPlanLevel = planLevels[user.plan as keyof typeof planLevels] || 0;
     const requiredPlanLevel = planLevels[currentCar.planRequired as keyof typeof planLevels] || 0;
 
