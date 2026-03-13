@@ -49,13 +49,13 @@ export const PhaseGame2D = () => {
   const hasSavedProgress = useRef(false);
 
   useEffect(() => {
-    let xpMultiplier = 1;
-    if (user?.plan === 'basic') xpMultiplier = 2;
-    if (user?.plan === 'pro') xpMultiplier = 3;
-    if (user?.plan === 'extreme') xpMultiplier = 5;
+    let xp = 20; // Default for free
+    if (user?.plan === 'basic') xp = 50;
+    if (user?.plan === 'pro') xp = 70;
+    if (user?.plan === 'extreme') xp = 100;
 
-    setGainedXP((coins * 10 + Math.floor(score / 10)) * xpMultiplier);
-  }, [score, coins, user?.plan]);
+    setGainedXP(xp);
+  }, [user?.plan]);
 
   // Phase Configuration
   const phaseConfig = {
@@ -269,13 +269,14 @@ export const PhaseGame2D = () => {
     if (!user || hasSavedProgress.current) return;
     hasSavedProgress.current = true;
 
-    let xpMultiplier = 1;
-    if (user.plan === 'basic') xpMultiplier = 2;
-    if (user.plan === 'pro') xpMultiplier = 3;
-    if (user.plan === 'extreme') xpMultiplier = 5;
+    let gainedXP = 20; // Default for free
+    if (user.plan === 'basic') gainedXP = 50;
+    if (user.plan === 'pro') gainedXP = 70;
+    if (user.plan === 'extreme') gainedXP = 100;
 
-    let gainedXP = (coins * 10 + Math.floor(score / 10)) * xpMultiplier;
     let gainedCredits = coins;
+
+    console.log('XP Calculation:', { coins, score, plan: user.plan, gainedXP });
 
     // Task Progress Logic
     const { generateDailyTasks, getDailySeed } = await import('../utils/tasks');
@@ -306,7 +307,14 @@ export const PhaseGame2D = () => {
           if (currentP.progress >= task.target) {
             currentP.progress = task.target;
             currentP.completed = true;
-            gainedXP += task.rewardXP;
+
+            // Use fixed XP based on plan
+            let taskXP = 20; // Default for free
+            if (user.plan === 'basic') taskXP = 50;
+            if (user.plan === 'pro') taskXP = 70;
+            if (user.plan === 'extreme') taskXP = 100;
+
+            gainedXP += taskXP;
             gainedCredits += task.rewardCoins;
           }
 
