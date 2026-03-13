@@ -220,7 +220,7 @@ export function App() {
                   </div>
 
                   <nav className="hidden md:flex items-center gap-8">
-                    <Link to="/" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('home')}</Link>
+                    <Link to="/" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">INICIO</Link>
                     <Link to="/garage" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('garage')}</Link>
                     <Link to="/plans" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('plans')}</Link>
                     <Link to="/profile" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('profile')}</Link>
@@ -270,8 +270,18 @@ export function App() {
               </p>
 
               <div className="flex gap-6">
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Termos</a>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Suporte</a>
+                <a href="https://api.whatsapp.com/send/?phone=5571981574664&text=Bom+dia%2C+Boa+tarde%2C+Boa+noites&type=phone_number&app_absent=0" target="_blank" className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">
+                  <img src="https://i.imgur.com/TTRDtPU.png" alt="WhatsApp" className="h-4 w-4" />
+                  WhatsApp
+                </a>
+                <a href="https://www.instagram.com/wesleybizerraofc/" target="_blank" className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">
+                  <img src="https://i.imgur.com/zkNfToG.png" alt="Instagram" className="h-4 w-4" />
+                  INSTAGRAM
+                </a>
+                <a href="https://www.youtube.com/@WesleyBizerraYTNovo" target="_blank" className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">
+                  <img src="https://i.imgur.com/op17Zqw.png" alt="YouTube" className="h-4 w-4" />
+                  Canal no Youtube
+                </a>
               </div>
             </div>
           </footer>
