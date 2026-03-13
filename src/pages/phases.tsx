@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { phases } from '../data';
 import { Link } from 'react-router-dom';
 import { Lock, Play } from 'lucide-react';
+import { UserContext } from '../App';
 
 export const Phases = () => {
   const { t } = useTranslation();
-  const unlockedPhase = 5; // Mock: user has unlocked up to phase 5
+  const { user } = useContext(UserContext);
+  const unlockedPhase = user?.unlockedPhase || 1;
 
   return (
     <div className="min-h-screen bg-black pt-24 pb-12 px-6">
@@ -33,12 +35,11 @@ export const Phases = () => {
                 transition={{ delay: (i % 20) * 0.02 }}
               >
                 <Link
-                  to={isUnlocked ? `/phase-3d/${phase.id}` : "#"}
-                  className={`group relative flex aspect-square flex-col items-center justify-center rounded-2xl border transition-all ${
-                    isUnlocked
+                  to={isUnlocked ? `/phase-2d/${phase.id}` : "#"}
+                  className={`group relative flex aspect-square flex-col items-center justify-center rounded-2xl border transition-all ${isUnlocked
                       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black hover:scale-105"
                       : "border-white/5 bg-white/5 text-white/10 cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   <span className="text-2xl font-black">{phase.id}</span>
                   <div className="absolute bottom-2">
@@ -48,7 +49,7 @@ export const Phases = () => {
                       <Lock className="h-3 w-3" />
                     )}
                   </div>
-                  
+
                   {isUnlocked && (
                     <div className="absolute inset-0 rounded-2xl bg-emerald-500 opacity-0 blur-xl transition-opacity group-hover:opacity-20" />
                   )}

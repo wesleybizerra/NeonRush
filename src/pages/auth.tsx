@@ -14,17 +14,20 @@ const bumperOptions = ["Original", "Sport", "Agressivo", "Legend"];
 const windowOptions = ["Cristal", "Fume leve", "Fume escuro", "Cromado"];
 
 function createBaseAccount(input: any) {
+  const isAdmin = input.email.toLowerCase() === 'wesleybizerra@hotmail.com' || input.isAdmin;
+
   return {
     id: uuidv4(),
     username: input.username,
     email: input.email.toLowerCase(),
     password: input.password,
     plan: "free",
-    isAdmin: input.isAdmin,
+    isAdmin: isAdmin,
     createdAt: new Date().toISOString(),
-    credits: 10000,
+    credits: isAdmin ? 0 : 10000,
     xp: 0,
-    unlockedPhase: 30,
+    level: isAdmin ? 0 : 1,
+    unlockedPhase: isAdmin ? 1 : 1,
     inventory: { characters: [], cars: [], outfits: [], evolutions: [] },
     garage: {
       carColor: colorOptions[0],
@@ -39,6 +42,7 @@ function createBaseAccount(input: any) {
       },
       upgrades: { engine: 0, suspension: 0, nitro: 0, brake: 0, turbo: 0 },
     },
+    taskProgress: {}
   };
 }
 
@@ -73,20 +77,20 @@ export const Auth = ({ onAuthSuccess }: { onAuthSuccess: (email: string) => void
             type="text"
             placeholder="Username"
             className="w-full rounded bg-white/10 p-3 text-white"
-            onChange={(e) => setForm({...form, username: e.target.value})}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
           />
         )}
         <input
           type="email"
           placeholder="Email"
           className="w-full rounded bg-white/10 p-3 text-white"
-          onChange={(e) => setForm({...form, email: e.target.value})}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
           type="password"
           placeholder="Password"
           className="w-full rounded bg-white/10 p-3 text-white"
-          onChange={(e) => setForm({...form, password: e.target.value})}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
         <button type="submit" className="w-full rounded bg-emerald-500 p-3 font-black uppercase text-black">
           {mode === 'login' ? t('login') : t('register')}

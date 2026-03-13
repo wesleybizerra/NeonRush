@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useMemo, useState } from "react";
 import { HashRouter, Routes, Route, Link, Navigate } from "react-router-dom";
 import { db } from "./firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where, getDocs, updateDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { Home } from "./pages/home";
 import { Garage } from "./pages/garage";
@@ -13,6 +13,11 @@ import { PhaseGame } from "./pages/phase-game";
 import { PhaseGame2D } from "./pages/phase-game-2d";
 import { Phases } from "./pages/phases";
 import { DailyTasks } from "./pages/daily-tasks";
+
+export const UserContext = React.createContext<{
+  user: UserAccount | null;
+  updateUser: (data: Partial<UserAccount>) => Promise<void>;
+}>({ user: null, updateUser: async () => { } });
 
 // ... (rest of the file remains the same)
 
@@ -50,11 +55,13 @@ type UserAccount = {
   createdAt?: string;
   credits?: number;
   xp?: number;
+  level?: number;
   unlockedPhase?: number;
   inventory?: InventoryState;
   garage?: GarageState;
   deviceId?: string;
   ip?: string;
+  taskProgress?: Record<string, { progress: number, completed: boolean, date: string }>;
 };
 
 const STORAGE_SESSION = "neon-rush-session";
@@ -82,7 +89,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
           <pre className="bg-white/5 p-4 rounded-xl text-[10px] text-red-400 text-left overflow-auto max-w-full mb-8">
             {this.state.error?.message || "Erro desconhecido"}
           </pre>
-          <button 
+          <button
             onClick={() => window.location.href = '/'}
             className="rounded-full bg-emerald-500 px-8 py-3 text-xs font-black uppercase tracking-widest text-black"
           >
@@ -121,6 +128,34 @@ export function App() {
     return users.find((u) => u.email === currentEmail.toLowerCase()) || null;
   }, [users, currentEmail]);
 
+  const updateUser = async (data: Partial<UserAccount>) => {
+    if (!currentUser) return;
+    try {
+      const q = query(collection(db, "users"), where("email", "==", currentUser.email));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, data);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser && currentUser.email === 'wesleybizerra@hotmail.com') {
+      if (currentUser.unlockedPhase === 30 || currentUser.credits === 10000 || currentUser.level === undefined) {
+        updateUser({
+          unlockedPhase: 1,
+          level: 0,
+          xp: 0,
+          credits: 0,
+          taskProgress: {}
+        });
+      }
+    }
+  }, [currentUser]);
+
   const handleAuthSuccess = (email: string) => {
     setCurrentEmail(email);
     window.localStorage.setItem(STORAGE_SESSION, email);
@@ -143,80 +178,82 @@ export function App() {
   }
 
   return (
-    <HashRouter>
-      <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 selection:text-emerald-200">
-        {!currentUser ? (
-          <Auth onAuthSuccess={handleAuthSuccess} />
-        ) : (
-          <>
-            <header className="sticky top-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-md">
-              <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-                    <span className="text-xl font-black italic">NR</span>
+    <UserContext.Provider value={{ user: currentUser, updateUser }}>
+      <HashRouter>
+        <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 selection:text-emerald-200">
+          {!currentUser ? (
+            <Auth onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <>
+              <header className="sticky top-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-md">
+                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+                      <span className="text-xl font-black italic">NR</span>
+                    </div>
+                    <h1 className="text-2xl font-black tracking-tighter uppercase italic">
+                      Neon<span className="text-emerald-500">Rush</span>
+                    </h1>
                   </div>
-                  <h1 className="text-2xl font-black tracking-tighter uppercase italic">
-                    Neon<span className="text-emerald-500">Rush</span>
-                  </h1>
+
+                  <nav className="hidden md:flex items-center gap-8">
+                    <Link to="/" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('home')}</Link>
+                    <Link to="/garage" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('garage')}</Link>
+                    <Link to="/plans" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('plans')}</Link>
+                    <Link to="/profile" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('profile')}</Link>
+                    <Link to="/tasks" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Missões</Link>
+                    <Link to="/phases" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Fases</Link>
+                  </nav>
+
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white hover:text-black"
+                    >
+                      {t('logout')}
+                    </button>
+                  </div>
                 </div>
+              </header>
 
-                <nav className="hidden md:flex items-center gap-8">
-                  <Link to="/" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('home')}</Link>
-                  <Link to="/garage" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('garage')}</Link>
-                  <Link to="/plans" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('plans')}</Link>
-                  <Link to="/profile" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('profile')}</Link>
-                  <Link to="/tasks" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Missões</Link>
-                  <Link to="/phases" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Fases</Link>
-                </nav>
-
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={handleLogout}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white hover:text-black"
-                  >
-                    {t('logout')}
-                  </button>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/garage" element={<Garage />} />
+                  <Route path="/plans" element={<Plans userEmail={currentEmail} />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/tasks" element={<DailyTasks />} />
+                  <Route path="/phases" element={<Phases />} />
+                  <Route path="/phase/:phaseId" element={<PhaseGame2D />} />
+                  <Route path="/phase-3d/:phaseId" element={<PhaseGame2D />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </ErrorBoundary>
+            </>
+          )}
+          <footer className="border-t border-white/5 bg-black px-6 py-12">
+            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded bg-emerald-500 text-black">
+                  <span className="text-sm font-black italic">NR</span>
                 </div>
+                <span className="text-lg font-black tracking-tighter uppercase italic">
+                  Neon<span className="text-emerald-500">Rush</span>
+                </span>
               </div>
-            </header>
 
-            <ErrorBoundary>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/garage" element={<Garage />} />
-                <Route path="/plans" element={<Plans userEmail={currentEmail} />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/tasks" element={<DailyTasks />} />
-                <Route path="/phases" element={<Phases />} />
-                <Route path="/phase/:phaseId" element={<PhaseGame2D />} />
-                <Route path="/phase-3d/:phaseId" element={<PhaseGame2D />} />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </ErrorBoundary>
-          </>
-        )}
-        <footer className="border-t border-white/5 bg-black px-6 py-12">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-8 md:flex-row">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-emerald-500 text-black">
-                <span className="text-sm font-black italic">NR</span>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+                © 2025 Neon Rush Street Racing • v2.0.1 • Desenvolvido para a Elite
+              </p>
+
+              <div className="flex gap-6">
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Termos</a>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Suporte</a>
               </div>
-              <span className="text-lg font-black tracking-tighter uppercase italic">
-                Neon<span className="text-emerald-500">Rush</span>
-              </span>
             </div>
-            
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">
-              © 2025 Neon Rush Street Racing • v2.0.1 • Desenvolvido para a Elite
-            </p>
-
-            <div className="flex gap-6">
-              <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Termos</a>
-              <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white">Suporte</a>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </HashRouter>
+          </footer>
+        </div>
+      </HashRouter>
+    </UserContext.Provider>
   );
 }

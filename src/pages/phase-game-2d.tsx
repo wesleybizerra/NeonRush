@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Coins, Heart, Zap } from 'lucide-react';
+import { ArrowLeft, Coins, Heart, Zap, Pause, Play } from 'lucide-react';
+import { UserContext } from '../App';
 
 // --- GAME ENGINE ---
 interface GameObject {
@@ -18,35 +19,43 @@ export const PhaseGame2D = () => {
   const { phaseId } = useParams();
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+  const { user, updateUser } = useContext(UserContext);
+
   // Game State
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [coins, setCoins] = useState(0);
   const [lives, setLives] = useState(3);
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
+  const [phaseCompleted, setPhaseCompleted] = useState(false);
 
   // Phase Configuration
   const phaseConfig = {
-    1: { name: 'Neon Suburbs', speed: 5, enemyColor: '#ff0055', bgColor: '#0a0a1a' },
-    2: { name: 'Cyber City', speed: 8, enemyColor: '#ffaa00', bgColor: '#1a0a1a' },
-    3: { name: 'Wasteland Highway', speed: 12, enemyColor: '#ff0000', bgColor: '#1a0505' },
-    4: { name: 'Quantum Tunnel', speed: 15, enemyColor: '#00ffff', bgColor: '#001122' },
-    5: { name: 'Neon Core', speed: 20, enemyColor: '#ffffff', bgColor: '#220022' },
-  }[Number(phaseId)] || { name: 'Unknown Zone', speed: 5, enemyColor: '#ff0055', bgColor: '#0a0a1a' };
+    1: { name: 'Neon Suburbs', speed: 6, enemyColor: '#ff0055', bgColor: '#0a0a1a', goalScore: 150 },
+    2: { name: 'Cyber City', speed: 9, enemyColor: '#ffaa00', bgColor: '#1a0a1a', goalScore: 300 },
+    3: { name: 'Wasteland Highway', speed: 13, enemyColor: '#ff0000', bgColor: '#1a0505', goalScore: 450 },
+    4: { name: 'Quantum Tunnel', speed: 17, enemyColor: '#00ffff', bgColor: '#001122', goalScore: 600 },
+    5: { name: 'Neon Core', speed: 22, enemyColor: '#ffffff', bgColor: '#220022', goalScore: 750 },
+  }[Number(phaseId)] || { name: 'Unknown Zone', speed: 6, enemyColor: '#ff0055', bgColor: '#0a0a1a', goalScore: Number(phaseId) * 150 };
 
   // Game Loop Refs
   const requestRef = useRef<number>();
   const playerRef = useRef<GameObject>({ x: 0, y: 0, width: 40, height: 80, color: '#00ffcc' });
   const enemiesRef = useRef<GameObject[]>([]);
   const coinsRef = useRef<GameObject[]>([]);
-  const linesRef = useRef<{y: number}[]>(Array.from({length: 10}).map((_, i) => ({y: i * 100})));
+  const linesRef = useRef<{ y: number }[]>(Array.from({ length: 10 }).map((_, i) => ({ y: i * 100 })));
   const keysRef = useRef<{ [key: string]: boolean }>({});
   const frameCountRef = useRef(0);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => { keysRef.current[e.code] = true; };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysRef.current[e.code] = true;
+      if (e.code === 'Escape' || e.code === 'KeyP') {
+        setIsPaused(p => !p);
+      }
+    };
     const handleKeyUp = (e: KeyboardEvent) => { keysRef.current[e.code] = false; };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -59,13 +68,15 @@ export const PhaseGame2D = () => {
   const startGame = () => {
     setIsPlaying(true);
     setIsGameOver(false);
+    setIsPaused(false);
+    setPhaseCompleted(false);
     setScore(0);
     setCoins(0);
     setLives(3);
     enemiesRef.current = [];
     coinsRef.current = [];
     frameCountRef.current = 0;
-    
+
     if (canvasRef.current) {
       playerRef.current.x = canvasRef.current.width / 2 - playerRef.current.width / 2;
       playerRef.current.y = canvasRef.current.height - 120;
@@ -81,7 +92,13 @@ export const PhaseGame2D = () => {
   };
 
   const gameLoop = () => {
-    if (!isPlaying || isGameOver) return;
+    if (!isPlaying || isGameOver || isPaused) {
+      if (isPlaying && !isGameOver && isPaused) {
+        requestRef.current = requestAnimationFrame(gameLoop);
+      }
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -101,7 +118,7 @@ export const PhaseGame2D = () => {
     });
 
     // Player Movement
-    const speed = 7;
+    const speed = 8;
     if ((keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) && playerRef.current.x > 0) {
       playerRef.current.x -= speed;
     }
@@ -111,7 +128,7 @@ export const PhaseGame2D = () => {
 
     // Spawn Enemies
     frameCountRef.current++;
-    if (frameCountRef.current % (60 - Math.min(40, Number(phaseId) * 5)) === 0) {
+    if (frameCountRef.current % (50 - Math.min(35, Number(phaseId) * 5)) === 0) {
       const lane = Math.floor(Math.random() * 3);
       const laneWidth = canvas.width / 3;
       enemiesRef.current.push({
@@ -120,12 +137,12 @@ export const PhaseGame2D = () => {
         width: 40,
         height: 80,
         color: phaseConfig.enemyColor,
-        speed: phaseConfig.speed + Math.random() * 5
+        speed: phaseConfig.speed + Math.random() * 6
       });
     }
 
     // Spawn Coins
-    if (frameCountRef.current % 100 === 0) {
+    if (frameCountRef.current % 80 === 0) {
       const lane = Math.floor(Math.random() * 3);
       const laneWidth = canvas.width / 3;
       coinsRef.current.push({
@@ -170,7 +187,7 @@ export const PhaseGame2D = () => {
     for (let i = coinsRef.current.length - 1; i >= 0; i--) {
       const coin = coinsRef.current[i];
       coin.y += coin.speed!;
-      
+
       ctx.beginPath();
       ctx.arc(coin.x + 15, coin.y + 15, 15, 0, Math.PI * 2);
       ctx.fillStyle = coin.color;
@@ -188,7 +205,13 @@ export const PhaseGame2D = () => {
       ) {
         coinsRef.current.splice(i, 1);
         setCoins(c => c + 1);
-        setScore(s => s + 50);
+        setScore(s => {
+          const newScore = s + 50;
+          if (newScore >= phaseConfig.goalScore && !phaseCompleted) {
+            setPhaseCompleted(true);
+          }
+          return newScore;
+        });
       } else if (coin.y > canvas.height) {
         coinsRef.current.splice(i, 1);
       }
@@ -207,7 +230,88 @@ export const PhaseGame2D = () => {
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [isPlaying, isGameOver]);
+  }, [isPlaying, isGameOver, isPaused]);
+
+  // Save Progress to Firebase
+  const saveProgress = async () => {
+    if (!user) return;
+
+    let xpMultiplier = 1;
+    if (user.plan === 'basic') xpMultiplier = 2;
+    if (user.plan === 'pro') xpMultiplier = 3;
+    if (user.plan === 'extreme') xpMultiplier = 5;
+
+    let gainedXP = coins * 10 * xpMultiplier;
+    let gainedCredits = coins;
+
+    // Task Progress Logic
+    const { generateDailyTasks, getDailySeed } = await import('../utils/tasks');
+    const seed = getDailySeed();
+    const allTasks = generateDailyTasks(seed);
+    const taskProgress = { ...(user.taskProgress || {}) };
+
+    allTasks.forEach(task => {
+      // Only process tasks for this phase or any phase
+      if (task.phaseId === undefined || task.phaseId === Number(phaseId)) {
+        let currentP = taskProgress[task.id];
+
+        // Reset if it's a new day
+        if (!currentP || currentP.date !== seed) {
+          currentP = { progress: 0, completed: false, date: seed };
+        }
+
+        if (!currentP.completed) {
+          if (task.actionType === 'collect_coins') {
+            currentP.progress += coins;
+          } else if (task.actionType === 'reach_score') {
+            // For reach score, we take the max of current progress and new score
+            currentP.progress = Math.max(currentP.progress, score);
+          } else if (task.actionType === 'play_phase') {
+            currentP.progress += 1;
+          }
+
+          if (currentP.progress >= task.target) {
+            currentP.progress = task.target;
+            currentP.completed = true;
+            gainedXP += task.rewardXP;
+            gainedCredits += task.rewardCoins;
+          }
+
+          taskProgress[task.id] = currentP;
+        }
+      }
+    });
+
+    let currentXP = (user.xp || 0) + gainedXP;
+    let currentLevel = user.level || 1;
+    const maxLevel = 150;
+
+    // Level up logic
+    while (currentLevel < maxLevel) {
+      const requiredXP = currentLevel * 1000;
+      if (currentXP >= requiredXP) {
+        currentLevel++;
+        if (user.plan !== 'extreme') {
+          currentXP = 0; // Reset XP if not extreme plan
+        }
+      } else {
+        break;
+      }
+    }
+
+    let newUnlockedPhase = user.unlockedPhase || 1;
+    if (phaseCompleted && Number(phaseId) === newUnlockedPhase) {
+      newUnlockedPhase++;
+    }
+
+    await updateUser({
+      xp: currentXP,
+      level: currentLevel,
+      credits: (user.credits || 0) + gainedCredits,
+      unlockedPhase: newUnlockedPhase,
+      taskProgress
+    });
+  };
 
   useEffect(() => {
     if (isGameOver) {
@@ -215,8 +319,14 @@ export const PhaseGame2D = () => {
         setHighScore(score);
         localStorage.setItem(`highscore_phase_${phaseId}`, score.toString());
       }
+      saveProgress();
     }
-  }, [isGameOver, score]);
+  }, [isGameOver]);
+
+  const handleExit = async () => {
+    await saveProgress();
+    navigate('/phases');
+  };
 
   // Handle Resize
   useEffect(() => {
@@ -229,7 +339,6 @@ export const PhaseGame2D = () => {
           if (!isPlaying) {
             playerRef.current.x = canvasRef.current.width / 2 - 20;
             playerRef.current.y = canvasRef.current.height - 120;
-            // Draw initial state
             const ctx = canvasRef.current.getContext('2d');
             if (ctx) {
               ctx.fillStyle = phaseConfig.bgColor;
@@ -250,20 +359,34 @@ export const PhaseGame2D = () => {
       {/* HUD */}
       <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 pointer-events-none">
         <div>
-          <button 
-            onClick={() => navigate('/phases')}
+          <button
+            onClick={handleExit}
             className="pointer-events-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-xs font-black uppercase tracking-widest">Sair</span>
+            <span className="text-xs font-black uppercase tracking-widest">Sair e Salvar</span>
           </button>
           <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
             {phaseConfig.name}
           </h1>
           <p className="text-emerald-500 font-black tracking-widest uppercase text-sm">Fase {phaseId}</p>
+          <div className="mt-2 text-xs font-bold text-white/60 uppercase tracking-widest">
+            Objetivo: {score} / {phaseConfig.goalScore} Pontos
+            {phaseCompleted && <span className="ml-2 text-emerald-500">✓ CONCLUÍDO</span>}
+          </div>
         </div>
-        
+
         <div className="flex flex-col items-end gap-2">
+          {isPlaying && !isGameOver && (
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              className="pointer-events-auto flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-colors mb-2"
+            >
+              {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              <span className="text-xs font-bold uppercase tracking-widest">{isPaused ? 'Continuar' : 'Pausar'}</span>
+            </button>
+          )}
+
           <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
             <Zap className="h-4 w-4 text-emerald-500" />
             <span className="font-mono text-xl font-bold">{score.toString().padStart(6, '0')}</span>
@@ -283,24 +406,37 @@ export const PhaseGame2D = () => {
       {/* Game Canvas Container */}
       <div className="absolute inset-0 flex justify-center items-center">
         <div className="relative w-full max-w-lg h-full border-x border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-          <canvas 
-            ref={canvasRef} 
+          <canvas
+            ref={canvasRef}
             className="w-full h-full block"
           />
 
           {/* Mobile Controls */}
-          {isPlaying && !isGameOver && (
+          {isPlaying && !isGameOver && !isPaused && (
             <div className="absolute bottom-10 left-0 w-full flex justify-between px-4 md:hidden">
-              <button 
+              <button
                 className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
                 onTouchStart={() => { keysRef.current['ArrowLeft'] = true; }}
                 onTouchEnd={() => { keysRef.current['ArrowLeft'] = false; }}
               />
-              <button 
+              <button
                 className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
                 onTouchStart={() => { keysRef.current['ArrowRight'] = true; }}
                 onTouchEnd={() => { keysRef.current['ArrowRight'] = false; }}
               />
+            </div>
+          )}
+
+          {/* Paused Screen */}
+          {isPaused && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+              <h2 className="text-4xl font-black uppercase italic mb-8 text-white">Pausado</h2>
+              <button
+                onClick={() => setIsPaused(false)}
+                className="rounded-full bg-emerald-500 px-12 py-4 text-sm font-black uppercase tracking-widest text-black hover:bg-emerald-400 hover:scale-105 transition-all"
+              >
+                Continuar
+              </button>
             </div>
           )}
 
@@ -309,7 +445,7 @@ export const PhaseGame2D = () => {
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
               <h2 className="text-4xl font-black uppercase italic mb-2 text-emerald-500">Pronto?</h2>
               <p className="text-white/60 mb-8 text-sm uppercase tracking-widest">Use as setas ou A/D para desviar.</p>
-              <button 
+              <button
                 onClick={startGame}
                 className="rounded-full bg-emerald-500 px-12 py-4 text-sm font-black uppercase tracking-widest text-black hover:bg-emerald-400 hover:scale-105 transition-all"
               >
@@ -322,7 +458,7 @@ export const PhaseGame2D = () => {
           {isGameOver && (
             <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
               <h2 className="text-5xl font-black uppercase italic mb-2 text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]">Destruído</h2>
-              
+
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 w-full max-w-xs mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-white/50 uppercase text-xs font-bold tracking-widest">Pontuação</span>
@@ -332,6 +468,12 @@ export const PhaseGame2D = () => {
                   <span className="text-white/50 uppercase text-xs font-bold tracking-widest">Moedas</span>
                   <span className="font-mono text-xl font-bold text-yellow-500">+{coins}</span>
                 </div>
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-white/50 uppercase text-xs font-bold tracking-widest">XP Ganho</span>
+                  <span className="font-mono text-xl font-bold text-emerald-500">
+                    +{coins * 10 * (user?.plan === 'extreme' ? 5 : user?.plan === 'pro' ? 3 : user?.plan === 'basic' ? 2 : 1)}
+                  </span>
+                </div>
                 <div className="h-px w-full bg-white/10 my-4" />
                 <div className="flex justify-between items-center">
                   <span className="text-emerald-500 uppercase text-xs font-bold tracking-widest">Recorde</span>
@@ -340,13 +482,13 @@ export const PhaseGame2D = () => {
               </div>
 
               <div className="flex gap-4">
-                <button 
-                  onClick={() => navigate('/phases')}
+                <button
+                  onClick={handleExit}
                   className="rounded-full bg-white/10 border border-white/20 px-8 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-white/20 transition-all"
                 >
                   Sair
                 </button>
-                <button 
+                <button
                   onClick={startGame}
                   className="rounded-full bg-emerald-500 px-8 py-3 text-xs font-black uppercase tracking-widest text-black hover:bg-emerald-400 hover:scale-105 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)]"
                 >

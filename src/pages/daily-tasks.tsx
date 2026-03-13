@@ -1,44 +1,49 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Zap, Trophy, CheckCircle2 } from 'lucide-react';
+import { UserContext } from '../App';
+import { generateDailyTasks, getDailySeed } from '../utils/tasks';
 
 export const DailyTasks = () => {
+  const { user } = useContext(UserContext);
+
+  const seed = getDailySeed();
+  const allTasks = useMemo(() => generateDailyTasks(seed), [seed]);
+
+  const missions = allTasks.filter(t => t.type === 'mission');
+  const challenges = allTasks.filter(t => t.type === 'challenge');
+  const objectives = allTasks.filter(t => t.type === 'objective');
+
+  const getTaskProgress = (taskId: string) => {
+    if (!user?.taskProgress) return { progress: 0, completed: false };
+    const p = user.taskProgress[taskId];
+    if (p && p.date === seed) {
+      return p;
+    }
+    return { progress: 0, completed: false };
+  };
+
   const categories = [
     {
       title: "Missões Diárias",
       icon: <Zap className="h-6 w-6 text-emerald-500" />,
-      count: 200,
+      count: missions.length,
       description: "Missões rápidas para ganhar XP e Créditos.",
-      tasks: Array.from({ length: 200 }, (_, i) => ({
-        id: i + 1,
-        title: `Missão ${i + 1}: Velocidade Máxima`,
-        reward: "150 XP",
-        completed: i < 5
-      }))
+      tasks: missions
     },
     {
       title: "Desafios Diários",
       icon: <Trophy className="h-6 w-6 text-emerald-500" />,
-      count: 200,
+      count: challenges.length,
       description: "Desafios de habilidade para os melhores pilotos.",
-      tasks: Array.from({ length: 200 }, (_, i) => ({
-        id: i + 1,
-        title: `Desafio ${i + 1}: Drift Perfeito`,
-        reward: "300 XP",
-        completed: i < 2
-      }))
+      tasks: challenges
     },
     {
       title: "Objetivos Diários",
       icon: <Target className="h-6 w-6 text-emerald-500" />,
-      count: 200,
+      count: objectives.length,
       description: "Objetivos estratégicos para dominar a cidade.",
-      tasks: Array.from({ length: 200 }, (_, i) => ({
-        id: i + 1,
-        title: `Objetivo ${i + 1}: Conquistar Distrito`,
-        reward: "500 XP",
-        completed: i < 1
-      }))
+      tasks: objectives
     }
   ];
 
@@ -50,7 +55,7 @@ export const DailyTasks = () => {
             CENTRAL DE <span className="text-emerald-500">OPERAÇÕES</span>
           </h1>
           <p className="mt-4 text-white/40 font-medium uppercase tracking-widest">
-            600 Tarefas disponíveis para você hoje
+            {allTasks.length} Tarefas disponíveis para você hoje
           </p>
         </div>
 
@@ -81,33 +86,47 @@ export const DailyTasks = () => {
               </div>
 
               <div className="flex-grow overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                {cat.tasks.map((task) => (
-                  <div 
-                    key={task.id}
-                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                      task.completed 
-                        ? "bg-emerald-500/10 border-emerald-500/30 opacity-60" 
-                        : "bg-white/5 border-white/5 hover:border-white/20"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {task.completed ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-white/20" />
-                      )}
-                      <div>
-                        <p className="text-xs font-bold">{task.title}</p>
-                        <p className="text-[10px] text-emerald-500 uppercase font-black">{task.reward}</p>
+                {cat.tasks.map((task) => {
+                  const { progress, completed } = getTaskProgress(task.id);
+                  const progressPct = Math.min(100, (progress / task.target) * 100);
+
+                  return (
+                    <div
+                      key={task.id}
+                      className={`flex flex-col p-4 rounded-2xl border transition-all ${completed
+                          ? "bg-emerald-500/10 border-emerald-500/30 opacity-60"
+                          : "bg-white/5 border-white/5 hover:border-white/20"
+                        }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          {completed ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-1" />
+                          ) : (
+                            <div className="h-4 w-4 rounded-full border-2 border-white/20 mt-1" />
+                          )}
+                          <div>
+                            <p className="text-xs font-bold">{task.title}</p>
+                            <p className="text-[10px] text-white/50 mt-1">{task.description}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 pl-7">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-[10px] font-black text-emerald-500 uppercase">{task.rewardXP} XP | {task.rewardCoins} Moedas</span>
+                          <span className="text-[10px] font-black text-white/40">{progress} / {task.target}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-500 transition-all duration-500"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                    {!task.completed && (
-                      <button className="rounded-full bg-white/10 px-3 py-1 text-[8px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all">
-                        Iniciar
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           ))}
