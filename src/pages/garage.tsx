@@ -86,6 +86,7 @@ export const cars2D = [
     id: 'verde',
     name: 'Viper Verde',
     details: 'Velocidade bruta e proteção. Exclusivo do Plano Corredor Cyber.',
+    armorDetails: 'Demora mais para perder vida: bate 5 vezes sem perder coração, na 6ª vez perde 1. Cada vida perdida, o ciclo reinicia. Mais vida, mais tempo, mais pontos, mais XP, mais level, mais moedas.',
     specialty: 'Blindagem',
     color: '#00ff00',
     planRequired: 'viper',
@@ -97,6 +98,7 @@ export const cars2D = [
     id: 'dourado',
     name: 'Midas Dourado',
     details: 'O auge do luxo e proteção. Exclusivo do Plano Lenda do Neon.',
+    armorDetails: 'Demora mais para perder vida: bate 11 vezes sem perder coração, na 12ª vez perde 1. Cada vida perdida, o ciclo reinicia. Mais vida, mais tempo, mais pontos, mais XP, mais level, mais moedas.',
     specialty: 'Blindagem',
     color: '#ffd700',
     planRequired: 'midas',
@@ -229,6 +231,9 @@ export const Garage = () => {
               {currentCar.name}
             </h2>
             <p className="text-lg text-white/50 mb-6">{currentCar.details}</p>
+            {currentCar.armorDetails && (
+              <p className="text-sm text-emerald-400 mb-6 font-bold">{currentCar.armorDetails}</p>
+            )}
 
             <div className="flex gap-4 mb-8">
               <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-500">
