@@ -23,12 +23,7 @@ export const PhaseGame2D = () => {
   const { user, updateUser } = useContext(UserContext);
 
   const getMaxLives = () => {
-    switch (user?.plan) {
-      case 'extreme': return 8; // 3 + 5
-      case 'pro': return 6; // 3 + 3
-      case 'basic': return 4; // 3 + 1
-      default: return 3;
-    }
+    return 3 + (user?.extraLives || 0);
   };
 
   const getPlayerCar = () => {
@@ -47,6 +42,10 @@ export const PhaseGame2D = () => {
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
   const [phaseCompleted, setPhaseCompleted] = useState(false);
   const hasSavedProgress = useRef(false);
+
+  useEffect(() => {
+    setLives(getMaxLives());
+  }, [user?.extraLives]);
 
   useEffect(() => {
     let xpPerCoin = 10;
@@ -155,7 +154,7 @@ export const PhaseGame2D = () => {
     });
 
     // Player Movement
-    const speed = getPlayerCar().handling / 8;
+    const speed = getPlayerCar().dirigibilidade / 8;
     if ((keysRef.current['ArrowLeft'] || keysRef.current['KeyA']) && playerRef.current.x > 0) {
       playerRef.current.x -= speed;
     }
