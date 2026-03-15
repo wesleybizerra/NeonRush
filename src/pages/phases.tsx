@@ -9,7 +9,27 @@ import { UserContext } from '../App';
 export const Phases = () => {
   const { t } = useTranslation();
   const { user } = useContext(UserContext);
-  const unlockedPhase = user?.unlockedPhase || 1;
+  
+  // Helper to get coins collected in a specific phase
+  const getCoinsForPhase = (phaseId: number) => {
+    return user?.taskProgress?.[`phase-coins-${phaseId}`]?.progress || 0;
+  };
+
+  const isPhaseUnlocked = (phaseId: number) => {
+    if (phaseId === 1) return true;
+    
+    const prevPhaseId = phaseId - 1;
+    const coinsNeeded = prevPhaseId === 1 ? 25 :
+                        prevPhaseId === 2 ? 50 :
+                        prevPhaseId === 3 ? 75 :
+                        prevPhaseId === 4 ? 100 :
+                        prevPhaseId === 5 ? 125 :
+                        prevPhaseId === 6 ? 150 :
+                        prevPhaseId === 7 ? 175 :
+                        prevPhaseId === 8 ? 200 : 200;
+                        
+    return getCoinsForPhase(prevPhaseId) >= coinsNeeded;
+  };
 
   return (
     <div className="min-h-screen bg-black pt-24 pb-12 px-6">
@@ -20,13 +40,13 @@ export const Phases = () => {
           </h1>
           <div className="text-right">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Progresso</p>
-            <p className="text-xl font-black text-emerald-500">{unlockedPhase} / {phases.length}</p>
+            <p className="text-xl font-black text-emerald-500">{phases.filter(p => isPhaseUnlocked(p.id)).length} / {phases.length}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
           {phases.map((phase, i) => {
-            const isUnlocked = phase.id <= unlockedPhase;
+            const isUnlocked = isPhaseUnlocked(phase.id);
             return (
               <motion.div
                 key={phase.id}
@@ -39,12 +59,14 @@ export const Phases = () => {
                   onClick={(e) => {
                     if (!isUnlocked) {
                       e.preventDefault();
+                      alert(`Colete moedas suficientes na fase anterior para liberar esta!`);
                     }
                   }}
-                  className={`group relative flex aspect-square flex-col items-center justify-center rounded-2xl border transition-all ${isUnlocked
+                  className={`group relative flex aspect-square flex-col items-center justify-center rounded-2xl border transition-all ${
+                    isUnlocked
                       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black hover:scale-105"
                       : "border-white/5 bg-white/5 text-white/10 cursor-not-allowed"
-                    }`}
+                  }`}
                 >
                   <span className="text-2xl font-black">{phase.id}</span>
                   <div className="absolute bottom-2">
@@ -54,7 +76,7 @@ export const Phases = () => {
                       <Lock className="h-3 w-3" />
                     )}
                   </div>
-
+                  
                   {isUnlocked && (
                     <div className="absolute inset-0 rounded-2xl bg-emerald-500 opacity-0 blur-xl transition-opacity group-hover:opacity-20" />
                   )}
