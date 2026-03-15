@@ -64,7 +64,7 @@ type UserAccount = {
   deviceId?: string;
   ip?: string;
   taskProgress?: Record<string, { progress: number, completed: boolean, date: string }>;
-  dailyRewards?: { currentDay: number, lastPlayedDate: string, secondsPlayedToday: number };
+  dailyRewards?: { currentDay: number, lastPlayedDate: string, secondsPlayedToday: number, rewardGranted?: boolean };
 };
 
 const STORAGE_SESSION = "neon-rush-session";
@@ -181,6 +181,7 @@ export function App() {
   }, [currentUser?.plan]);
 
 
+  const [showMenu, setShowMenu] = useState(false);
   const handleAuthSuccess = (email: string) => {
     setCurrentEmail(email);
     window.localStorage.setItem(STORAGE_SESSION, email);
@@ -206,6 +207,20 @@ export function App() {
     <UserContext.Provider value={{ user: currentUser, updateUser }}>
       <HashRouter>
         <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30 selection:text-emerald-200">
+          {/* Global Mobile Menu */}
+          {showMenu && (
+            <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+              <button onClick={() => setShowMenu(false)} className="absolute top-6 right-6 text-white/50 hover:text-white text-2xl">X</button>
+              <Link to="/" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Início</Link>
+              <Link to="/garage" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>{t('garage')}</Link>
+              <Link to="/plans" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>{t('plans')}</Link>
+              <Link to="/profile" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>{t('profile')}</Link>
+              <Link to="/tasks" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Missões</Link>
+              <Link to="/daily-rewards" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Prêmios</Link>
+              <Link to="/phases" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Fases</Link>
+            </div>
+          )}
+
           {!currentUser ? (
             <Auth onAuthSuccess={handleAuthSuccess} />
           ) : (
@@ -221,6 +236,14 @@ export function App() {
                     </h1>
                   </div>
 
+                  {/* Mobile Menu Toggle */}
+                  <button
+                    onClick={() => setShowMenu(true)}
+                    className="md:hidden bg-white/10 px-4 py-2 rounded-full border border-white/10 text-xs font-bold uppercase tracking-widest"
+                  >
+                    Menu
+                  </button>
+
                   <nav className="hidden md:flex items-center gap-8">
                     <Link to="/" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">INICIO</Link>
                     <Link to="/garage" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">{t('garage')}</Link>
@@ -231,7 +254,7 @@ export function App() {
                     <Link to="/phases" className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white">Fases</Link>
                   </nav>
 
-                  <div className="flex items-center gap-4">
+                  <div className="hidden md:flex items-center gap-4">
                     <button
                       onClick={handleLogout}
                       className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white hover:text-black"
