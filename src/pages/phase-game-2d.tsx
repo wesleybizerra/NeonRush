@@ -417,6 +417,19 @@ export const PhaseGame2D = () => {
     navigate('/phases');
   };
 
+  const getCoinsNeededForNextPhase = (currentPhaseId: number) => {
+    return currentPhaseId === 1 ? 25 :
+           currentPhaseId === 2 ? 50 :
+           currentPhaseId === 3 ? 75 :
+           currentPhaseId === 4 ? 100 :
+           currentPhaseId === 5 ? 125 :
+           currentPhaseId === 6 ? 150 :
+           currentPhaseId === 7 ? 175 :
+           currentPhaseId === 8 ? 200 : 200;
+  };
+
+  const coinsNeeded = getCoinsNeededForNextPhase(Number(phaseId));
+
   // Handle Resize
   useEffect(() => {
     const handleResize = () => {
@@ -460,31 +473,31 @@ export const PhaseGame2D = () => {
       )}
 
       {/* HUD */}
-      <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-start z-10 pointer-events-none">
         <div>
           <button 
             onClick={handleExit}
-            className="pointer-events-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-4"
+            className="pointer-events-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-2 md:mb-4"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-xs font-black uppercase tracking-widest">Sair</span>
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">Sair</span>
           </button>
           
           {/* Mobile Menu Button */}
           <button 
             onClick={() => setShowMenu(true)}
-            className="pointer-events-auto md:hidden bg-white/10 px-4 py-2 rounded-full border border-white/10 text-xs font-bold uppercase tracking-widest mb-4"
+            className="pointer-events-auto md:hidden bg-white/10 px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest mb-2"
           >
             Menu
           </button>
 
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+          <h1 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
             {phaseConfig.name}
           </h1>
-          <p className="text-emerald-500 font-black tracking-widest uppercase text-sm">Fase {phaseId}</p>
-          <div className="mt-2 text-xs font-bold text-white/60 uppercase tracking-widest">
-            Objetivo: {score} / {phaseConfig.goalScore} Pontos
-            {phaseCompleted && <span className="ml-2 text-emerald-500">✓ CONCLUÍDO</span>}
+          <p className="text-emerald-500 font-black tracking-widest uppercase text-[10px] md:text-xs">Fase {phaseId}</p>
+          <div className="mt-1 text-[9px] md:text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            Meta: {coins} / {coinsNeeded} Moedas para Fase {Number(phaseId) + 1}
+            {coins >= coinsNeeded && <span className="ml-1 text-emerald-500">✓</span>}
           </div>
         </div>
         
