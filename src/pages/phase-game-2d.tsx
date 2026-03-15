@@ -473,60 +473,56 @@ export const PhaseGame2D = () => {
       )}
 
       {/* HUD */}
-      <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-start z-10 pointer-events-none">
+      <div className="absolute top-0 left-0 w-full p-2 flex justify-between items-start z-10 pointer-events-none">
         <div>
           <button 
             onClick={handleExit}
-            className="pointer-events-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-2 md:mb-4"
+            className="pointer-events-auto flex items-center gap-1 text-white/50 hover:text-white transition-colors mb-1"
           >
-            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">Sair</span>
+            <ArrowLeft className="h-3 w-3" />
+            <span className="text-[8px] font-black uppercase tracking-widest">Sair</span>
           </button>
           
           {/* Mobile Menu Button */}
           <button 
             onClick={() => setShowMenu(true)}
-            className="pointer-events-auto md:hidden bg-white/10 px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest mb-2"
+            className="pointer-events-auto md:hidden bg-white/10 px-2 py-0.5 rounded-full border border-white/10 text-[8px] font-bold uppercase tracking-widest mb-1"
           >
             Menu
           </button>
 
-          <h1 className="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+          <h1 className="text-lg font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
             {phaseConfig.name}
           </h1>
-          <p className="text-emerald-500 font-black tracking-widest uppercase text-[10px] md:text-xs">Fase {phaseId}</p>
-          <div className="mt-1 text-[9px] md:text-[10px] font-bold text-white/60 uppercase tracking-widest">
-            Meta: {coins} / {coinsNeeded} Moedas para Fase {Number(phaseId) + 1}
+          <p className="text-emerald-500 font-black tracking-widest uppercase text-[8px]">Fase {phaseId}</p>
+          <div className="mt-0.5 text-[8px] font-bold text-white/60 uppercase tracking-widest">
+            Meta: {coins} / {coinsNeeded} Moedas
             {coins >= coinsNeeded && <span className="ml-1 text-emerald-500">✓</span>}
           </div>
         </div>
         
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-0.5">
           {isPlaying && !isGameOver && (
             <button 
               onClick={() => setIsPaused(!isPaused)}
-              className="pointer-events-auto flex items-center gap-1 bg-white/10 hover:bg-white/20 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 transition-colors mb-1"
+              className="pointer-events-auto flex items-center gap-1 bg-white/10 hover:bg-white/20 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10 transition-colors"
             >
-              {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
-              <span className="text-[9px] font-bold uppercase tracking-widest">{isPaused ? 'Cont.' : 'Pausa'}</span>
+              {isPaused ? <Play className="h-2 w-2" /> : <Pause className="h-2 w-2" />}
+              <span className="text-[8px] font-bold uppercase tracking-widest">{isPaused ? 'Cont.' : 'Pausa'}</span>
             </button>
           )}
 
-          <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-            <Zap className="h-3 w-3 text-emerald-500" />
-            <span className="font-mono text-xs font-bold">{score.toString().padStart(6, '0')}</span>
+          <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
+            <Zap className="h-2.5 w-2.5 text-emerald-500" />
+            <span className="font-mono text-[10px] font-bold">{score.toString().padStart(6, '0')}</span>
           </div>
-          <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-            <Star className="h-3 w-3 text-emerald-500" />
-            <span className="font-mono text-xs font-bold text-emerald-500">{gainedXP} XP</span>
+          <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded-full border border-white/10">
+            <Coins className="h-2.5 w-2.5 text-yellow-500" />
+            <span className="font-mono text-[10px] font-bold text-yellow-500">{coins}</span>
           </div>
-          <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-            <Coins className="h-3 w-3 text-yellow-500" />
-            <span className="font-mono text-xs font-bold text-yellow-500">{coins}</span>
-          </div>
-          <div className="flex items-center gap-0.5 mt-1">
+          <div className="flex items-center gap-0.5 mt-0.5">
             {Array.from({ length: Math.max(3, getMaxLives()) }).map((_, i) => (
-              <Heart key={i} className={`h-3 w-3 ${i < lives ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
+              <Heart key={i} className={`h-2.5 w-2.5 ${i < lives ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
             ))}
           </div>
         </div>
@@ -534,7 +530,7 @@ export const PhaseGame2D = () => {
 
       {/* Game Canvas Container */}
       <div className="absolute inset-0 flex justify-center items-center">
-        <div className="relative w-full max-w-lg h-full border-x border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        <div className="relative w-full max-w-lg h-[calc(100vh-100px)] mt-[100px] border-x border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
           <canvas 
             ref={canvasRef} 
             className="w-full h-full block"
@@ -542,26 +538,20 @@ export const PhaseGame2D = () => {
 
           {/* Mobile Controls */}
           {isPlaying && !isGameOver && !isPaused && (
-            <div className="absolute bottom-10 left-0 w-full flex justify-between px-4 md:hidden">
+            <div className="absolute bottom-4 left-0 w-full flex justify-between px-4 md:hidden">
               <button 
-                className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
+                className="w-20 h-20 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
                 onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = true; }}
                 onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
-                onTouchCancel={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
                 onMouseDown={(e) => { keysRef.current['ArrowLeft'] = true; }}
                 onMouseUp={(e) => { keysRef.current['ArrowLeft'] = false; }}
-                onMouseLeave={(e) => { keysRef.current['ArrowLeft'] = false; }}
-                onContextMenu={(e) => e.preventDefault()}
               />
               <button 
-                className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
+                className="w-20 h-20 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
                 onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = true; }}
                 onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
-                onTouchCancel={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
                 onMouseDown={(e) => { keysRef.current['ArrowRight'] = true; }}
                 onMouseUp={(e) => { keysRef.current['ArrowRight'] = false; }}
-                onMouseLeave={(e) => { keysRef.current['ArrowRight'] = false; }}
-                onContextMenu={(e) => e.preventDefault()}
               />
             </div>
           )}
