@@ -501,13 +501,23 @@ export const PhaseGame2D = () => {
             <div className="absolute bottom-10 left-0 w-full flex justify-between px-4 md:hidden">
               <button
                 className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
-                onTouchStart={() => { keysRef.current['ArrowLeft'] = true; }}
-                onTouchEnd={() => { keysRef.current['ArrowLeft'] = false; }}
+                onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = true; }}
+                onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
+                onTouchCancel={(e) => { e.preventDefault(); keysRef.current['ArrowLeft'] = false; }}
+                onMouseDown={(e) => { keysRef.current['ArrowLeft'] = true; }}
+                onMouseUp={(e) => { keysRef.current['ArrowLeft'] = false; }}
+                onMouseLeave={(e) => { keysRef.current['ArrowLeft'] = false; }}
+                onContextMenu={(e) => e.preventDefault()}
               />
               <button
                 className="w-24 h-24 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm active:bg-white/30"
-                onTouchStart={() => { keysRef.current['ArrowRight'] = true; }}
-                onTouchEnd={() => { keysRef.current['ArrowRight'] = false; }}
+                onTouchStart={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = true; }}
+                onTouchEnd={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
+                onTouchCancel={(e) => { e.preventDefault(); keysRef.current['ArrowRight'] = false; }}
+                onMouseDown={(e) => { keysRef.current['ArrowRight'] = true; }}
+                onMouseUp={(e) => { keysRef.current['ArrowRight'] = false; }}
+                onMouseLeave={(e) => { keysRef.current['ArrowRight'] = false; }}
+                onContextMenu={(e) => e.preventDefault()}
               />
             </div>
           )}
