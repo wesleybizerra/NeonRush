@@ -319,6 +319,13 @@ export const PhaseGame2D = () => {
     const allTasks = generateDailyTasks(seed);
     const taskProgress = { ...(user.taskProgress || {}) };
     
+    // Track coins for phase unlocking
+    taskProgress[`phase-coins-${phaseId}`] = {
+      progress: (taskProgress[`phase-coins-${phaseId}`]?.progress || 0) + coins,
+      completed: true,
+      date: seed
+    };
+    
     allTasks.forEach(task => {
       // Only process tasks for this phase or any phase
       if (task.phaseId === undefined || task.phaseId === Number(phaseId)) {
@@ -494,19 +501,19 @@ export const PhaseGame2D = () => {
 
           <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
             <Zap className="h-3 w-3 text-emerald-500" />
-            <span className="font-mono text-sm font-bold">{score.toString().padStart(6, '0')}</span>
+            <span className="font-mono text-xs font-bold">{score.toString().padStart(6, '0')}</span>
           </div>
           <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
             <Star className="h-3 w-3 text-emerald-500" />
-            <span className="font-mono text-sm font-bold text-emerald-500">{gainedXP} XP</span>
+            <span className="font-mono text-xs font-bold text-emerald-500">{gainedXP} XP</span>
           </div>
           <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
             <Coins className="h-3 w-3 text-yellow-500" />
-            <span className="font-mono text-sm font-bold text-yellow-500">{coins}</span>
+            <span className="font-mono text-xs font-bold text-yellow-500">{coins}</span>
           </div>
           <div className="flex items-center gap-0.5 mt-1">
             {Array.from({ length: Math.max(3, getMaxLives()) }).map((_, i) => (
-              <Heart key={i} className={`h-4 w-4 ${i < lives ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
+              <Heart key={i} className={`h-3 w-3 ${i < lives ? 'text-red-500 fill-red-500' : 'text-white/20'}`} />
             ))}
           </div>
         </div>
