@@ -46,6 +46,7 @@ export const PhaseGame2D = () => {
   const hitsTakenRef = useRef(0);
   const [highScore, setHighScore] = useState(parseInt(localStorage.getItem(`highscore_phase_${phaseId}`) || '0'));
   const [phaseCompleted, setPhaseCompleted] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const hasSavedProgress = useRef(false);
 
   useEffect(() => {
@@ -437,6 +438,20 @@ export const PhaseGame2D = () => {
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden font-sans">
+      {/* Mobile Menu Overlay */}
+      {showMenu && (
+        <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+          <button onClick={() => setShowMenu(false)} className="absolute top-6 right-6 text-white/50 hover:text-white text-2xl">X</button>
+          <Link to="/" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Início</Link>
+          <Link to="/garage" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Garagem</Link>
+          <Link to="/plans" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Planos</Link>
+          <Link to="/profile" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Perfil</Link>
+          <Link to="/tasks" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Missões</Link>
+          <Link to="/daily-rewards" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Prêmios</Link>
+          <Link to="/phases" className="text-2xl font-black uppercase tracking-widest text-white" onClick={() => setShowMenu(false)}>Fases</Link>
+        </div>
+      )}
+
       {/* HUD */}
       <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-10 pointer-events-none">
         <div>
@@ -445,8 +460,17 @@ export const PhaseGame2D = () => {
             className="pointer-events-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-xs font-black uppercase tracking-widest">Sair e Salvar</span>
+            <span className="text-xs font-black uppercase tracking-widest">Sair</span>
           </button>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setShowMenu(true)}
+            className="pointer-events-auto md:hidden bg-white/10 px-4 py-2 rounded-full border border-white/10 text-xs font-bold uppercase tracking-widest mb-4"
+          >
+            Menu
+          </button>
+
           <h1 className="text-3xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
             {phaseConfig.name}
           </h1>
@@ -474,11 +498,11 @@ export const PhaseGame2D = () => {
           </div>
           <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
             <Star className="h-4 w-4 text-emerald-500" />
-            <span className="font-mono text-xl font-bold text-emerald-500">{gainedXP}</span>
+            <span className="font-mono text-xl font-bold text-emerald-500">{gainedXP} XP</span>
           </div>
           <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
             <Coins className="h-4 w-4 text-yellow-500" />
-            <span className="font-mono text-xl font-bold text-yellow-500">{coins}</span>
+            <span className="font-mono text-xl font-bold text-yellow-500">{coins} Moedas</span>
           </div>
           <div className="flex items-center gap-1 mt-2">
             {Array.from({ length: Math.max(3, getMaxLives()) }).map((_, i) => (
